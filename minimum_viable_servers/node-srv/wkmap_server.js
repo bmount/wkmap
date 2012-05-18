@@ -22,7 +22,7 @@ var srv = http.createServer(function (req, res) {
   } else {
     //var geoms = client.query(queries['osmline'], bbox(tile)) // mercator bbox of tms tile
     
-    // figure out what's going on with pg binary queries later
+    // figure out what's going on with pg binary queries
     var geoms = client.query('select st_asbinary(way) from planet_osm_polygon limit 10')
     console.log(geoms)
     res.writeHead(200, {"Content-Type": "application/octet-stream"})
