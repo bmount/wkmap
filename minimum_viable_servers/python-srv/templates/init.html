@@ -1,0 +1,21 @@
+<!doctype html>
+
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <!-- Optional DataView polyfill for Firefox, hard to tell when it will be
+    natively supported. Hear IE 10 may support, no ability to check -->
+    <script src="https://raw.github.com/davidflanagan/DataView.js/master/DataView.js"></script>
+    <script src=static/wkmap.js></script>
+  </head>
+  
+  <body> 
+
+  <div style=position:absolute; id=mapdiv></div>
+
+<script>
+  //wkbmap(false, false, 'api/censusblocks')
+  wkmap(false, false, 'api/osmpolygon', '#mapdiv')
+  wkmap(false, false, 'api/osmline', '#mapdiv')
+  wkmap(false, false, 'api/osmpoint', '#mapdiv')
+</script>
