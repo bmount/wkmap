@@ -186,7 +186,7 @@ function uncollect (buf, canvas, tilePoint, zoom, layered) {
     , wkbType, linearRings
     , polygons = 0, multiLength = 0
     , numRecs = 0, numPts
-    , tilePoint.y = (1 << zoom) - tilePoint.y
+    tilePoint.y = (1 << zoom) - tilePoint.y
 
   if (!layered) ctx.clearRect(0,0,256,256)
   while (idx < fullLength) { 
