@@ -144,5 +144,5 @@ def others(other):
 def favicon():
     return ""
 
-#app.run(debug=True)
+app.run(debug=True)
 
