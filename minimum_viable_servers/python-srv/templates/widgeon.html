@@ -6,7 +6,15 @@
     <script src="static/wkmap_uncollector.js"></script>
     <script src="static/d3.v2.min.js"></script>
     <style>
-      #map { overflow:hidden; position:absolute; height:100%; width:100%; }
+      #map { 
+        overflow:hidden; 
+        position:absolute; 
+        height:90%; 
+        width:90%; 
+        top:5%; 
+        left:5%; 
+        border: 5px solid rgba(11,11,11,.5); 
+      }
     </style>      
   </head>
 <body>
@@ -26,26 +34,45 @@ var mapContainer = d3.select("#map").node()
 
 
 var map = wkmap()
-  , center = [-122.42, 37.76]
+  , position = { geography:[-122.42, 37.76], browser:[0,0], anchor: null }
   , zoom0 = 13
   , height = mapContainer.clientHeight
   , width = mapContainer.clientWidth
   , xVisible = Math.ceil(width/512)  // tile count left, right of center
-  , yVisible = Math.ceil(height/512)
+  , yVisible = Math.ceil(height/512) 
   , wkbCache = {}
+  
+function flaskProvider (baseUrl) {
+  function mkurl (tile) {
+    return baseUrl + tile.join('/')+'.wkb'
+  }
+  return mkurl
+}
 
-function displayedTiles (ctr) {
+var overlay = flaskProvider("/api/osmline/")
+
+function displayedTiles (ctr, xmin, ymin, xmax, ymax) {
+  if (!position.anchor) position.anchor = ctr
   var rv = []
-  for (var i = -1*(xVisible); i < xVisible; i++) {
-    for (var j = -1*(yVisible); j < yVisible; j++) {
-      rv.push({tms:[ctr[0], ctr[1]+i, ctr[2]+j], pos:[i,j]})
+    , xmin = xmin || (xVisible * -1)
+    , ymin = ymin || (yVisible * -1)
+    , xmax = xmax || xVisible
+    , ymax = ymax || yVisible
+  for (var i = xmin; i <= xmax; i++) {
+    for (var j = ymin; j <= ymax; j++) {
+      rv.push({tms:[ctr[0], ctr[1]+i, ctr[2]+j], 
+        pos:[i,j]})
     }
   }
   return rv
 }
 
+function panEdge(d) {}  
+
 var dragmap = d3.behavior.drag()
-    .on("drag", function (d, i) {
+.on("drag", function (d, i) {
+      position.browser[0] += d3.event.dx
+      position.browser[1] += d3.event.dy
       d3.selectAll(".maptile")
         .style("top", function () { 
               return (parseInt(d3.select(this).node().style.top) + 
@@ -57,43 +84,12 @@ var dragmap = d3.behavior.drag()
         })
       })
 
-// will be once per layer
-d3.select("#map").selectAll("canvas")
-  .data(displayedTiles(map.tile(center, zoom0)))
- .enter()
-  .append("canvas")
-  .attr("class", "maptile")
-  .attr("height", "256px")
-  .attr("width", "256px")
-  .style("position", "absolute")
-  .style("top", function (d) { 
-      d.y = (height/2 + d.pos[1]*256)
-      return d.y.toString() + 'px' 
-    })
-  .style("left", function (d) { 
-      d.x = (width/2 + d.pos[0]*256)
-      return d.x.toString() + 'px' 
-    })
-  .attr("id", function (d) { xharr(d.tms, d3.select(this).node(), map.render);  return 'tile-'+d.tms.join('-') })
-  //.style("background", function (d) { return "rgba(11,11,11,.4)" })
-  .call(dragmap)
-
-
 // this should become something like modestmaps concept of provider
 // better version along those lines in master/minimum_viable_servers/couch
-function flaskProvider (baseUrl) {
-  function mkurl (tile) {
-    return baseUrl + tile.join('/')+'.wkb'
-  }
-  return mkurl
-}
-
 
 function xharr (tile, el, callback) { // tee hee
-  var overlay = flaskProvider("/api/osmline/")
   var buf = new XMLHttpRequest
     , url = overlay(tile)
-  console.log(url)
   if (url in wkbCache) {
     callback(wkbCache[url], el, {x:tile[1], y:tile[2]}, tile[0])
     return
@@ -111,6 +107,36 @@ function xharr (tile, el, callback) { // tee hee
   return el
 }
 
+var inView =  displayedTiles(map.tile(position.geography, zoom0))
+
+// will be once per layer
+function display(tmsCoords) {
+  d3.select("#map").selectAll("canvas")
+    .data(tmsCoords)
+   .enter()
+    .append("canvas")
+    .attr("class", "maptile")
+    .attr("height", "256px")
+    .attr("width", "256px")
+    .attr("row", function (d) { return d.tms[2] })
+    .attr("col", function (d) { return d.tms[1] })
+    .style("position", "absolute")
+    .style("top", function (d) { 
+        d.y = (height/2 + d.pos[1]*256)
+        return d.y.toString() + 'px' 
+      })
+    .style("left", function (d) { 
+        d.x = (width/2 + d.pos[0]*256)
+        return d.x.toString() + 'px' 
+      })
+    .attr("id", function (d) { xharr(d.tms, d3.select(this).node(), map.render);  return 'tile-'+d.tms.join('-') })
+    //.style("background", function (d) { return "rgba(11,11,11,.4)" })
+    .call(dragmap)
+  }
+
+
+display(inView)
 
 </script>
-
+</body>
+</html>

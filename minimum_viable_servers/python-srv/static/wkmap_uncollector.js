@@ -39,7 +39,7 @@ function draw (dv, idx, ctx, numRecs, zm, tilePoint) {
     var qx = scale(x, zm, tilePoint.x),
         qy = scale(y, zm, tilePoint.y),
         pm = [1,-1][Math.round(Math.random())]
-    ctx.lineWidth = .5 + Math.random()*pm
+    ctx.lineWidth = 3 + 3*Math.random()*pm
     //ctx.quadraticCurveTo( qx-11*Math.random() * pm, qy+11*Math.random() * pm, qx, qy )
     ctx.lineTo(scale(x, zm, tilePoint.x), scale(y, zm, tilePoint.y))
     idx += 16
