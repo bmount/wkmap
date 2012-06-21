@@ -34,7 +34,7 @@ var mapContainer = d3.select("#map").node()
 
 
 var map = wkmap()
-  , position = { geography:[-122.42, 37.76], browser:[0,0], anchor: null }
+  , position = { geography:[-122.32, 37.76], browser:[0,0], anchor: null}
   , zoom0 = 13
   , height = mapContainer.clientHeight
   , width = mapContainer.clientWidth
@@ -52,6 +52,7 @@ function flaskProvider (baseUrl) {
 var overlay = flaskProvider("/api/osmline/")
 
 function displayedTiles (ctr, xmin, ymin, xmax, ymax) {
+console.log(ctr, xmin, ymin, xmax, ymax) 
   if (!position.anchor) position.anchor = ctr
   var rv = []
     , xmin = xmin || (xVisible * -1)
@@ -73,6 +74,12 @@ var dragmap = d3.behavior.drag()
 .on("drag", function (d, i) {
       position.browser[0] += d3.event.dx
       position.browser[1] += d3.event.dy
+      if (position.browser[0] > 256) {
+        xVisible = xVisible*(-1) - 1
+        console.log(position)
+        console.log([{tms:[zoom0, position.anchor[1] + xVisible, position.anchor[2]]}])
+        display([{tms:[zoom0, position.anchor[1] + xVisible, position.anchor[2] + yVisible]}])
+      }
       d3.selectAll(".maptile")
         .style("top", function () { 
               return (parseInt(d3.select(this).node().style.top) + 
@@ -121,12 +128,12 @@ function display(tmsCoords) {
     .attr("row", function (d) { return d.tms[2] })
     .attr("col", function (d) { return d.tms[1] })
     .style("position", "absolute")
-    .style("top", function (d) { 
-        d.y = (height/2 + d.pos[1]*256)
+    .style("top", function (d) { console.log(tmsCoords);
+        d.y = (height/2 + (d.tms[2] - position.anchor[2] + position.browser[1])*256)
         return d.y.toString() + 'px' 
       })
     .style("left", function (d) { 
-        d.x = (width/2 + d.pos[0]*256)
+        d.x = (width/2 + (d.tms[1] - position.anchor[1] + position.browser[0])*256)
         return d.x.toString() + 'px' 
       })
     .attr("id", function (d) { xharr(d.tms, d3.select(this).node(), map.render);  return 'tile-'+d.tms.join('-') })
