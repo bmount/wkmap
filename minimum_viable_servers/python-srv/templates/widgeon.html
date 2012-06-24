@@ -32,9 +32,8 @@ var mapContainer = d3.select("#map").node()
     The dom stuff is all d3.js and is partly an exercise in studying that library
 */
 
-
 var map = wkmap()
-  , position = { geography:[-122.32, 37.76], browser:[0,0], anchor: null}
+  , position = { geography:[-122.42, 37.76], browser:[0,0], anchor: null}
   , zoom0 = 13
   , height = mapContainer.clientHeight
   , width = mapContainer.clientWidth
@@ -68,20 +67,33 @@ console.log(ctr, xmin, ymin, xmax, ymax)
   return rv
 }
 
+var seen = {}
+
 function panEdge(d) {}  
 
 var dragmap = d3.behavior.drag()
-.on("drag", function (d, i) {
+    .on("drag", function (d, i) {
       position.browser[0] += d3.event.dx
       position.browser[1] += d3.event.dy
-      if (position.browser[0] > 256) {
-        xVisible = xVisible*(-1) - 1
-        console.log(position)
-        console.log([{tms:[zoom0, position.anchor[1] + xVisible, position.anchor[2]]}])
-        display([{tms:[zoom0, position.anchor[1] + xVisible, position.anchor[2] + yVisible]}])
+      if (position.browser[0] < 256) {
+        //xVisible += 1
+        //console.log(xVisible)
+        //console.log(position)
+        //console.log([{tms:[zoom0, position.anchor[1] + xVisible, position.anchor[2]]}])
+        for (var i = yVisible*(-1); i < yVisible; i++) {
+          var tl = {tms:[zoom0, position.anchor[1] + xVisible + 1, position.anchor[2] + i]}
+          //if (!seen[overlay(tl.tms)]) {
+            inView.push({tms:[zoom0, position.anchor[1] + xVisible + 1, position.anchor[2] + i]})
+            seen[overlay(tl.tms)] = true
+          //}
       }
+      displayedTiles(map.tile(position.geography, zoom0)).forEach(function (t) {
+        inView.push(t)
+      })
+    }
+        redisplay()
       d3.selectAll(".maptile")
-        .style("top", function () { 
+        .style("top", function () {
               return (parseInt(d3.select(this).node().style.top) + 
                       d3.event.dy).toString() + 'px'
         })
@@ -117,9 +129,9 @@ function xharr (tile, el, callback) { // tee hee
 var inView =  displayedTiles(map.tile(position.geography, zoom0))
 
 // will be once per layer
-function display(tmsCoords) {
+function display () {
   d3.select("#map").selectAll("canvas")
-    .data(tmsCoords)
+    .data(inView)
    .enter()
     .append("canvas")
     .attr("class", "maptile")
@@ -128,12 +140,12 @@ function display(tmsCoords) {
     .attr("row", function (d) { return d.tms[2] })
     .attr("col", function (d) { return d.tms[1] })
     .style("position", "absolute")
-    .style("top", function (d) { console.log(tmsCoords);
-        d.y = (height/2 + (d.tms[2] - position.anchor[2] + position.browser[1])*256)
+    .style("top", function (d) { console.log('nothing');
+        d.y = (height/2 + (d.tms[2] - position.anchor[2])*256 + position.browser[1])
         return d.y.toString() + 'px' 
       })
     .style("left", function (d) { 
-        d.x = (width/2 + (d.tms[1] - position.anchor[1] + position.browser[0])*256)
+        d.x = (width/2 + (d.tms[1] - position.anchor[1])*256 + position.browser[0])
         return d.x.toString() + 'px' 
       })
     .attr("id", function (d) { xharr(d.tms, d3.select(this).node(), map.render);  return 'tile-'+d.tms.join('-') })
@@ -141,6 +153,29 @@ function display(tmsCoords) {
     .call(dragmap)
   }
 
+function redisplay () {
+  d3.select("#map").selectAll("canvas")
+    .data(inView)
+    .enter()
+    .append("canvas")
+    .attr("class", "maptile")
+    .attr("height", "256px")
+    .attr("width", "256px")
+    .attr("row", function (d) { return d.tms[2] })
+    .attr("col", function (d) { return d.tms[1] })
+    .style("position", "absolute")
+    .style("top", function (d) { console.log('redisplaying');
+        d.y = (height/2 + (d.tms[2] - position.anchor[2])*256 + position.browser[1])
+        return d.y.toString() + 'px' 
+      })
+    .style("left", function (d) { 
+        d.x = (width/2 + (d.tms[1] - position.anchor[1])*256 + position.browser[0])
+        return d.x.toString() + 'px' 
+      })
+    .attr("id", function (d) { xharr(d.tms, d3.select(this).node(), map.render);  return 'tile-'+d.tms.join('-') })
+    //.style("background", function (d) { return "rgba(11,11,11,.4)" })
+    .call(dragmap)
+  }
 
 display(inView)
 

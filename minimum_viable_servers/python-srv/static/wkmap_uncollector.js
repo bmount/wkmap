@@ -24,11 +24,16 @@ function scale (pt, zm, tl) {
 
 function draw (dv, idx, ctx, numRecs, zm, tilePoint) {
   ctx.beginPath()
+  ctx.shadowOffsetX = 2
+  ctx.shadowOffsetY = 2
+  ctx.shadowBlur = .5
+  ctx.shadowColor = 'rgba(255,255,255,.4)'
   var n = 1,
       x = dv.getFloat64(idx, true),
       y = dv.getFloat64(idx+8, true)
   idx += 16
-  ctx.strokeStyle = '#'+Math.floor(Math.random()*16777).toString(16)
+  //ctx.strokeStyle = '#'+Math.floor(Math.random()*16777).toString(16)
+  ctx.strokeStyle = 'rgba(11,11,11,.5)'
   ctx.moveTo(scale(x, zm, tilePoint.x), scale(y, zm, tilePoint.y))
   var bzct = []
   while (n < numRecs) {
@@ -36,10 +41,10 @@ function draw (dv, idx, ctx, numRecs, zm, tilePoint) {
     y = dv.getFloat64(idx+8, true)
     n+=1
     // plainer correct: ctx.lineTo(scale(x, zm, tilePoint.x), scale(y, zm, tilePoint.y))
-    var qx = scale(x, zm, tilePoint.x),
-        qy = scale(y, zm, tilePoint.y),
-        pm = [1,-1][Math.round(Math.random())]
-    ctx.lineWidth = 3 + 3*Math.random()*pm
+    //var qx = scale(x, zm, tilePoint.x),
+    //    qy = scale(y, zm, tilePoint.y),
+    //    pm = [1,-1][Math.round(Math.random())]
+    ctx.lineWidth = 2 // + 2*Math.random()*pm
     //ctx.quadraticCurveTo( qx-11*Math.random() * pm, qy+11*Math.random() * pm, qx, qy )
     ctx.lineTo(scale(x, zm, tilePoint.x), scale(y, zm, tilePoint.y))
     idx += 16
