@@ -69,24 +69,23 @@ console.log(ctr, xmin, ymin, xmax, ymax)
 
 var seen = {}
 
+var panWest = 1
+
 function panEdge(d) {}  
 
 var dragmap = d3.behavior.drag()
     .on("drag", function (d, i) {
       position.browser[0] += d3.event.dx
       position.browser[1] += d3.event.dy
-      if (position.browser[0] < -256) {
-        //xVisible += 1
-        //console.log(xVisible)
-        //console.log(position)
-        //console.log([{tms:[zoom0, position.anchor[1] + xVisible, position.anchor[2]]}])
+      if (position.browser[0] < -256*panWest) {
         for (var i = yVisible*(-1); i < yVisible; i++) {
-          var tl = {tms:[zoom0, position.anchor[1] + xVisible + 1, position.anchor[2] + i]}
+          var tl = {tms:[zoom0, position.anchor[1] + xVisible + panWest, position.anchor[2] + i]}
           if (!seen[overlay(tl.tms)]) {
-            inView.push({tms:[zoom0, position.anchor[1] + xVisible + 1, position.anchor[2] + i]})
+            inView.push({tms:[zoom0, position.anchor[1] + xVisible + panWest, position.anchor[2] + i]})
             seen[overlay(tl.tms)] = true
           }
         }
+        panWest++
         display()
       }
       d3.selectAll(".maptile")
@@ -99,17 +98,18 @@ var dragmap = d3.behavior.drag()
                       d3.event.dx).toString() + 'px'
         })
       })
+ 
 
 // this should become something like modestmaps concept of provider
 // better version along those lines in master/minimum_viable_servers/couch
 
 function tilepos (el, tile) {
   d3.select(el)
-    .style('top', function () {
-     return (height/2 + (tile[2] - position.anchor[2])*256 + position.browser[1]).toString() + 'px'
+  .style('top', function () { console.log(this);
+     return (height/2 + (Number(d3.select(this).attr('row')) - position.anchor[2])*256 + position.browser[1]).toString() + 'px'
     })
     .style('left', function () {
-      return (height/2 + (tile[1] - position.anchor[1])*256 + position.browser[0]).toString() + 'px'
+      return (height/2 + (Number(d3.select(this).attr('col')) - position.anchor[1])*256 + position.browser[0]).toString() + 'px'
     })
 }
 
