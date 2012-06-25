@@ -75,23 +75,20 @@ var dragmap = d3.behavior.drag()
     .on("drag", function (d, i) {
       position.browser[0] += d3.event.dx
       position.browser[1] += d3.event.dy
-      if (position.browser[0] < 256) {
+      if (position.browser[0] < -256) {
         //xVisible += 1
         //console.log(xVisible)
         //console.log(position)
         //console.log([{tms:[zoom0, position.anchor[1] + xVisible, position.anchor[2]]}])
         for (var i = yVisible*(-1); i < yVisible; i++) {
           var tl = {tms:[zoom0, position.anchor[1] + xVisible + 1, position.anchor[2] + i]}
-          //if (!seen[overlay(tl.tms)]) {
+          if (!seen[overlay(tl.tms)]) {
             inView.push({tms:[zoom0, position.anchor[1] + xVisible + 1, position.anchor[2] + i]})
             seen[overlay(tl.tms)] = true
-          //}
+          }
+        }
+        display()
       }
-      displayedTiles(map.tile(position.geography, zoom0)).forEach(function (t) {
-        inView.push(t)
-      })
-    }
-        redisplay()
       d3.selectAll(".maptile")
         .style("top", function () {
               return (parseInt(d3.select(this).node().style.top) + 
@@ -106,6 +103,17 @@ var dragmap = d3.behavior.drag()
 // this should become something like modestmaps concept of provider
 // better version along those lines in master/minimum_viable_servers/couch
 
+function tilepos (el, tile) {
+  d3.select(el)
+    .style('top', function () {
+     return (height/2 + (tile[2] - position.anchor[2])*256 + position.browser[1]).toString() + 'px'
+    })
+    .style('left', function () {
+      return (height/2 + (tile[1] - position.anchor[1])*256 + position.browser[0]).toString() + 'px'
+    })
+}
+
+
 function xharr (tile, el, callback) { // tee hee
   var buf = new XMLHttpRequest
     , url = overlay(tile)
@@ -118,7 +126,8 @@ function xharr (tile, el, callback) { // tee hee
   buf.onload = function (evt) {
     if ('function' === typeof callback && buf.response) {
       wkbCache[url] = buf.response
-      callback(buf.response, el, {x:tile[1], y:tile[2]}, tile[0]) 
+      callback(buf.response, el, {x:tile[1], y:tile[2]}, tile[0])
+      tilepos(el, tile)
     } else { 
     }
   }
@@ -140,24 +149,15 @@ function display () {
     .attr("row", function (d) { return d.tms[2] })
     .attr("col", function (d) { return d.tms[1] })
     .style("position", "absolute")
-    .style("top", function (d) { console.log('nothing');
-        d.y = (height/2 + (d.tms[2] - position.anchor[2])*256 + position.browser[1])
-        return d.y.toString() + 'px' 
-      })
-    .style("left", function (d) { 
-        d.x = (width/2 + (d.tms[1] - position.anchor[1])*256 + position.browser[0])
-        return d.x.toString() + 'px' 
-      })
     .attr("id", function (d) { xharr(d.tms, d3.select(this).node(), map.render);  return 'tile-'+d.tms.join('-') })
-    //.style("background", function (d) { return "rgba(11,11,11,.4)" })
     .call(dragmap)
   }
 
 function redisplay () {
   d3.select("#map").selectAll("canvas")
     .data(inView)
-    .enter()
-    .append("canvas")
+    //.update()
+    //.append("canvas")
     .attr("class", "maptile")
     .attr("height", "256px")
     .attr("width", "256px")
