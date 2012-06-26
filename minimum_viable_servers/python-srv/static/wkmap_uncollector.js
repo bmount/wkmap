@@ -26,8 +26,9 @@ function draw (dv, idx, ctx, numRecs, zm, tilePoint) {
   ctx.beginPath()
   ctx.shadowOffsetX = 2
   ctx.shadowOffsetY = 2
-  ctx.shadowBlur = .5
-  ctx.shadowColor = 'rgba(255,255,255,.4)'
+  ctx.shadowBlur = .1
+  ctx.lineWidth = 3.5 // + 2*Math.random()*pm
+  ctx.shadowColor = 'rgba(255,255,255,.99)'
   var n = 1,
       x = dv.getFloat64(idx, true),
       y = dv.getFloat64(idx+8, true)
@@ -44,7 +45,7 @@ function draw (dv, idx, ctx, numRecs, zm, tilePoint) {
     //var qx = scale(x, zm, tilePoint.x),
     //    qy = scale(y, zm, tilePoint.y),
     //    pm = [1,-1][Math.round(Math.random())]
-    ctx.lineWidth = 2 // + 2*Math.random()*pm
+    //ctx.lineWidth = 2 // + 2*Math.random()*pm
     //ctx.quadraticCurveTo( qx-11*Math.random() * pm, qy+11*Math.random() * pm, qx, qy )
     ctx.lineTo(scale(x, zm, tilePoint.x), scale(y, zm, tilePoint.y))
     idx += 16
