@@ -159,6 +159,8 @@ function tilepos (el, tile) {
 }
 
 
+var pending = 0
+var semiqueue = []
 function xharr (tile, el, callback) { // tee hee
   var buf = new XMLHttpRequest
     , url = overlay(tile)

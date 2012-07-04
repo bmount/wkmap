@@ -28,6 +28,11 @@ queries = {
         st_envelope(st_geomfromtext('linestring({0} {1},{2} {3})', 900913)) 
         and boundary is null and motorcar is null and route is null 
         limit 3000;""",
+    'osmcoast' : """select
+        st_asbinary(ST_Intersection(st_envelope(st_geomfromtext('linestring({0} {1},{2} {3})', 900913)), wkb_geometry))
+        from san_francisco where wkb_geometry &&
+        st_envelope(st_geomfromtext('linestring({0} {1},{2} {3})', 900913)) 
+        limit 3000;""",
     'osmpolygon' : """select
         st_asbinary(ST_Intersection(st_envelope(st_geomfromtext('linestring({0} {1},{2} {3})', 900913)), way))
         from planet_osm_polygon where way &&
@@ -46,6 +51,11 @@ queries = {
         st_asbinary(ST_Intersection(st_envelope(st_geomfromtext('linestring({0} {1},{2} {3})', 900913)), 
         wkb_geometry)) from
         tl_2010_06075_tabblock10 where wkb_geometry &&
+        st_envelope(st_geomfromtext('linestring({0} {1},{2} {3})', 900913)) limit 3000;""",
+    'catl' : """select
+        st_asbinary(ST_Intersection(st_envelope(st_geomfromtext('linestring({0} {1},{2} {3})', 900913)), 
+        wkb_geometry)) from
+        tl_2010_06_tabblock10 where wkb_geometry &&
         st_envelope(st_geomfromtext('linestring({0} {1},{2} {3})', 900913)) limit 3000;""",
     'touristphoto' : """select
         st_asbinary(ST_Intersection(st_envelope(st_geomfromtext('linestring({0} {1},{2} {3})', 900913)), 
@@ -122,6 +132,7 @@ def wkb(x, y, z, query):
     if not query:
         return ""
     try:
+        #conn = psycopg2.connect(database='catl')
         conn = psycopg2.connect(database='sfcollection')
         cur = conn.cursor()
         cur.execute(query.format(*c.tile_to_mercator_bounds(x, y, z)))
@@ -144,5 +155,5 @@ def others(other):
 def favicon():
     return ""
 
-#app.run(host='0.0.0.0', debug=True)
+app.run(host='0.0.0.0', debug=True)
 
