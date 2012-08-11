@@ -1,5 +1,7 @@
 #2012 fast vector maps using 1950's technology!
 
+[slippy example](http://h.sfgeo.org/wk2/_design/wksfosm/widgeon.html)
+
 Sort of like a tiled geojson vector layer, but using OGC binary formats and 
 JavaScript ArrayBuffers and DataViews. Uses PostGIS queries inspired by
 Vizzuality/CartoDB's Vecnik project, and trying to apply that kind of cacheing
