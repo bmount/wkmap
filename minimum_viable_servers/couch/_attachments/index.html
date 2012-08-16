@@ -23,15 +23,15 @@
   
   function provider(baseUrl) {
     function couchProvider (arr) { 
-      return baseUrl + arr.slice(0,3).join('-') + '.wkb' 
+      return baseUrl + arr.slice(0,3).join('/') + '.ukb' 
     }
     return couchProvider
   }
 
 
   //      A base url from which Z/X/Y.wkb are pulled     abbrev/id    container
-  wkmap(false, provider('/osmwkb/_design/osmstreets/'), 'streets', '#mapdiv')
-  wkmap(false, provider('/osmwkb/_design/osmflowers/'), 'flowers', '#mapdiv')
+  wkmap(false, provider('/_canvasback/tms/'), 'streets', '#mapdiv')
+  //wkmap(false, provider('/osmwkb/_design/osmflowers/'), 'flowers', '#mapdiv')
 
 </script>
 
