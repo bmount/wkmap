@@ -181,7 +181,7 @@ function logbuf (buf, canvas, tilePoint, zoom, layered) {
   var fullLength = buf.byteLength,
       drawn = 0,
       ctx = canvas.getContext('2d'),
-      uktype, npts, view, forematter, x, y, ctx;
+      uktype, npts, view, forematter, x, y, px, py, ctx;
   var dv = new DataView(buf, 0, fullLength);
   //console.log('checkendian, little first then npts')
   //console.log(dv.getUint32(0, true));
@@ -192,11 +192,25 @@ function logbuf (buf, canvas, tilePoint, zoom, layered) {
     npts = dv.getUint32(drawn + 4, true);
     //console.log('type', ukbtype, 'npts', npts);
     drawn += 8;
+    //view = new Uint8Array(buf, drawn, npts*2);
+    //ctx.moveTo(view[0], view[1]);
+    ctx.beginPath()
     ctx.moveTo(dv.getUint8(drawn, true), 256 - dv.getUint8(drawn+1, true));
     for (var i = 2; i < npts*2; i += 2) {
-      ctx.lineTo(dv.getUint8(drawn + i, true), 256 - dv.getUint8(drawn + i + 1, true)); 
-      ctx.stroke()
+      x = dv.getUint8(drawn + i, true)
+      y = 256 - dv.getUint8(drawn + i + 1, true)
+      px = dv.getUint8(drawn + i - 2, true)
+      py = 256 - dv.getUint8(drawn + i - 1, true)
+      //ctx.lineTo(view[i], 256 - view[i + 1]);
+      if (((Math.abs(Math.abs(px) - Math.abs(x)) > 50) || (Math.abs((Math.abs(py) - Math.abs(y)) > 50)))) {
+       ctx.closePath();
+       continue;
+      }
+      ctx.lineTo(dv.getUint8(drawn + i, true), 256 - dv.getUint8(drawn + i + 1, true));
+    ctx.closePath()
+      
     }
+    ctx.stroke()
     //drawn += fullLength;
     drawn += npts*2;
   
