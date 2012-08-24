@@ -20,7 +20,7 @@ var center = center || [-122.53948, 37.88]
 /*
 close-enough radius of earth = 6378137
 π/180 = 0.0174532925 :: φ/2 -> 0.00872664626
-at equator, m per px if entire map is 1 256 px tile = 156543.0339280 
+at equator, m per px if entire map is 1 255 px tile = 156543.0339280 
 res0^-1 * tilesize ^-1 = 2.4953202336659905e-8
 Mercator equation: ln(atan(π/4 + φ/2)) * r
 */
@@ -45,13 +45,13 @@ function tileCoords (pt, zoom, projected) {
 
 function showTiles (center, w, h, zoom) {
   var center = tileCoords(center, zoom)
-    , exes = Math.ceil((w) / 256 + 1)
-    , wyes = wys = Math.ceil((h) / 256 + 1)
+    , exes = Math.ceil((w) / 255 + 1)
+    , wyes = wys = Math.ceil((h) / 255 + 1)
     , rv = []
   while (exes) {
     while (wyes) {
       rv.splice(0, 0, [zoom, center[1] + exes, center[2] + wyes,
-              [(exes-1)*256, (wyes-1)*256]]) 
+              [(exes-1)*255, (wyes-1)*255]]) 
       wyes--
     }
     wyes = wys
@@ -85,7 +85,7 @@ function get (tile, callback, el) {
 }
 
 function scale (pt, zm, tl) {
-  return Math.abs((pt + 20037508.342789) * (1 << zm) / 156543.033928041 - (tl*256))
+  return Math.abs((pt + 20037508.342789) * (1 << zm) / 156543.033928041 - (tl*255))
 }
 
 // This is what to mess with
@@ -195,18 +195,18 @@ function logbuf (buf, canvas, tilePoint, zoom, layered) {
     //view = new Uint8Array(buf, drawn, npts*2);
     //ctx.moveTo(view[0], view[1]);
     ctx.beginPath()
-    ctx.moveTo(dv.getUint8(drawn, true), 256 - dv.getUint8(drawn+1, true));
+    ctx.moveTo(dv.getUint8(drawn, true), 255 - dv.getUint8(drawn+1, true));
     for (var i = 2; i < npts*2; i += 2) {
       x = dv.getUint8(drawn + i, true)
-      y = 256 - dv.getUint8(drawn + i + 1, true)
+      y = 255 - dv.getUint8(drawn + i + 1, true)
       px = dv.getUint8(drawn + i - 2, true)
-      py = 256 - dv.getUint8(drawn + i - 1, true)
-      //ctx.lineTo(view[i], 256 - view[i + 1]);
+      py = 255 - dv.getUint8(drawn + i - 1, true)
+      //ctx.lineTo(view[i], 255 - view[i + 1]);
       if (((Math.abs(Math.abs(px) - Math.abs(x)) > 50) || (Math.abs((Math.abs(py) - Math.abs(y)) > 50)))) {
        ctx.closePath();
        continue;
       }
-      ctx.lineTo(dv.getUint8(drawn + i, true), 256 - dv.getUint8(drawn + i + 1, true));
+      ctx.lineTo(dv.getUint8(drawn + i, true), 255 - dv.getUint8(drawn + i + 1, true));
     ctx.closePath()
       
     }
@@ -234,7 +234,7 @@ function uncollect (buf, canvas, tilePoint, zoom, layered) {
   ctx.shadowBlur = 0
   ctx.shadowColor = "rgba(255,255,255,.9)"
 
-  if (!layered) ctx.clearRect(0,0,256,256)
+  if (!layered) ctx.clearRect(0,0,255,255)
     //ctx.shadowColor = "rgba(11,11,11,.7)"
   //ctx.fillStyle = "rgba(255,255,255,0)"
   while (idx < fullLength) { 
@@ -271,8 +271,8 @@ function semiqueue (tiles, layer) {
   while (tile = tiles.shift()) {
     pending++
     el = document.createElement('canvas')
-    el.height = 256
-    el.width = 256
+    el.height = 255
+    el.width = 255
     el.style.position = 'absolute'
     el.style.left = tile[3][0] + 'px'
     el.style.top = tile[3][1] + 'px'
