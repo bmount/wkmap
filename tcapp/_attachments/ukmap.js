@@ -11,10 +11,7 @@ var center = center || [-122.53948, 37.88]
     , wkbCache = {}
     // TMS-like urls and element id's:
     , mkurl = provider || function (arr) { return dataset + '/'+ arr.slice(0,3).join('/')+'.wkb' }
-    , mkid = function (arr) { return dataset.replace('/', '-')
-                                            .replace('.','-')
-                                            .replace(/^-/, '') + '-' 
-                                            + arr.slice(0,3).join('-') }
+    , mkid = function (arr) { return dataset + arr.slice(0,3).join('-') }
     , __ = function (sel) { return document.querySelector(sel) }
 
 /*
