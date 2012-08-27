@@ -151,16 +151,24 @@ function line (buf, canvas, tilePoint, zoom, layered) {
   ctx.shadowOffsetX = 3
   ctx.shadowOffsetY = 2
   ctx.shadowBlur = 5
-  ctx.shadowColor = "rgba(200,200,200,.8)";
+  ctx.shadowColor = "rgba(200,200,200,.1)";
   ctx.lineWidth = 2;
-  ctx.strokeStyle = "rgba(29,29,29,.8)";
+  ctx.strokeStyle = "rgba(21,21,210,.8)";
 
-  var dv = new DataView(buf, 0, fullLength);
+  var dv = new DataView(buf, 0, fullLength),
+      nstyles = 0
   while (drawn < fullLength) {
+    ctx.lineWidth = 2; // base style for osm residential
+    ctx.strokeStyle = "rgba(2,21,110,.6)";
+    //ctx.strokeStyle = "rgba(29,29,29,.8)";
     ukbtype = dv.getUint32(drawn, true);
     npts = dv.getUint32(drawn + 4, true);
     osmstyle = dv.getUint32(drawn + 8, true);
-    console.log(osmstyle)
+    //console.log(osmstyle)
+    if (osmstyle === 44) {
+      ctx.strokeStyle = "rgba(220, 0, 0, .8)";
+      ctx.lineWidth = 4;
+    }
     drawn += 12;
     ctx.beginPath()
     ctx.moveTo(dv.getUint8(drawn, true), 255 - dv.getUint8(drawn+1, true));
@@ -169,6 +177,7 @@ function line (buf, canvas, tilePoint, zoom, layered) {
     }
     ctx.closePath()
     ctx.stroke()
+    nstyles++
     drawn += npts*2;
   
   }
