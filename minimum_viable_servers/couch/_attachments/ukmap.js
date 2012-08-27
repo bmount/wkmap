@@ -1,10 +1,10 @@
 function wkmap (center, provider, dataset, mapContainer, h, w) {
-var center = center || [-122.53948, 37.88]
+var center = center || [-122.53948, 37.78]
     , dataset = dataset || ''
     , mapContainer = mapContainer || "#map"
     , h = h || 500
     , w = w || 600
-    , zoom = zoom || 13
+    , zoom = zoom || 14
     , queueable = 5
     , pending = 0
     , remaining = 0

@@ -34,9 +34,9 @@
 
 
   //      A base url from which Z/X/Y.wkb are pulled     abbrev/id    container
-  wkmap ( false, provider('', 'streets', '#mapdiv') )
+  //wkmap ( false, provider('', 'streets', '#mapdiv') )
   // example of canvasback behind couchdb proxy:
-  //wkmap(false, provider('/_canvasback/tms/'), 'streets', '#mapdiv')
+  wkmap(false, provider('/_canvasback/tms/'), 'streets', '#mapdiv')
   //wkmap(false, provider('/osmwkb/_design/osmflowers/'), 'flowers', '#mapdiv')
 
 </script>
