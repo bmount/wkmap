@@ -147,18 +147,21 @@ function line (buf, canvas, tilePoint, zoom, layered) {
   var fullLength = buf.byteLength,
       drawn = 0,
       ctx = canvas.getContext('2d'),
-      uktype, npts, view, forematter, x, y, px, py, ctx;
+      uktype, npts, view, forematter, x, y, px, py, ctx, osmstyle;
   ctx.shadowOffsetX = 3
   ctx.shadowOffsetY = 2
   ctx.shadowBlur = 5
   ctx.shadowColor = "rgba(200,200,200,.8)";
   ctx.lineWidth = 2;
   ctx.strokeStyle = "rgba(29,29,29,.8)";
+
   var dv = new DataView(buf, 0, fullLength);
   while (drawn < fullLength) {
     ukbtype = dv.getUint32(drawn, true);
     npts = dv.getUint32(drawn + 4, true);
-    drawn += 8;
+    osmstyle = dv.getUint32(drawn + 8, true);
+    console.log(osmstyle)
+    drawn += 12;
     ctx.beginPath()
     ctx.moveTo(dv.getUint8(drawn, true), 255 - dv.getUint8(drawn+1, true));
     for (var i = 2; i < npts*2; i += 2) {

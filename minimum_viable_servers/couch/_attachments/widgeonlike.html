@@ -1,4 +1,3 @@
-
 <!doctype html>
 
 <html> <!--:url('static/bg/pt3.png')  -->
@@ -21,8 +20,6 @@
   </head>
   <body>
 drag around; <a href="http://github.com/bvmou/wkmap">source</a>
-<a id=zin>IN</a>
-<a id=zout>OUT</a>
 <div id=map>
 </div>
 <script>
@@ -37,9 +34,9 @@ var mapContainer = d3.select("#map").node()
     The dom stuff is all d3.js and is partly an exercise in studying that library
 */
 
-var map = wkmap(position, zoom0)
-  , position = position || { geography:[-122.46, 37.8], browser:[0,0], anchor: null, z: zoom0 || 13 }
-  , zoom0 = zoom0 || 13
+var map = wkmap()
+  , position = { geography:[-122.46, 37.8], browser:[0,0], anchor: false}
+  , zoom0 = 13
   , height = mapContainer.clientHeight
   , width = mapContainer.clientWidth
   , xVisible = Math.ceil(width/512)  // tile count left, right of center
@@ -48,7 +45,7 @@ var map = wkmap(position, zoom0)
   
 function provider (baseUrl, delimiter) {
   function mkurl (tile) {
-    return baseUrl + tile.join(delimiter)+'.ukb'
+    return baseUrl + tile.join(delimiter)+'.wkb'
   }
   return mkurl
 }
@@ -173,8 +170,8 @@ function xharr (tile, el, callback) { // tee hee
   buf.onload = function (evt) {
     if ('function' === typeof callback && buf.response) {
       wkbCache[url] = buf.response
-      callback(buf.response, el, {x:tile[1], y:tile[2]}, tile[0])
       tilepos(el, tile)
+      callback(buf.response, el, {x:tile[1], y:tile[2]}, tile[0])
     } else { 
     }
   }
@@ -185,7 +182,7 @@ function xharr (tile, el, callback) { // tee hee
 var inView = displayedTiles(map.tile(position.geography, zoom0))
 
 // will be once per layer
-function display (wat) {
+function display () {
   d3.select("#map").selectAll("canvas")
     .data(inView)
    .enter()
@@ -200,23 +197,8 @@ function display (wat) {
     .call(dragmap)
 }
 
-
-display(inView)
-
-d3.select("#zin").on('click', function () {
-  d3.event.preventDefault();
-  console.log('zinin')
-  //wkmap(false, zoom0 + 1)
-  position.z += 1
-  inView =  displayedTiles(map.tile(position.geography, position.z))
-  //d3.select("#map").selectAll("canvas").data(inView)
-  display();
-})
-
-d3.select("#zout").on('click', function () {
-  d3.event.preventDefault();
-  wkmap(false, zoom0 - 1)
-  display
+document.addEventListener("DOMContentLoaded", function () {
+  display(inView)
 })
 
 </script>
