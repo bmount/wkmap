@@ -14,7 +14,7 @@
         top:5%; 
         left:5%; 
         border-style: outset;
-        background: rgba(211,211,211,.5); 
+        background: rgba(255,255,255,.5); 
       }
     </style>      
   </head>
@@ -87,7 +87,7 @@ var dragmap = d3.behavior.drag()
     .on("drag", function (d, i) {
       position.browser[0] += d3.event.dx
       position.browser[1] += d3.event.dy
-      if (position.browser[0] < -256*panWest) {
+      if (position.browser[0] < -255*panWest) {
         for (var i = (yVisible + panSouth)*(-1); i < (yVisible + panNorth); i++) {
           tl = ({tms:[zoom0, position.anchor[1] + xVisible + panWest, position.anchor[2] + i]})
           if (!seen[overlay(tl.tms)]) {
@@ -98,7 +98,7 @@ var dragmap = d3.behavior.drag()
         panWest++
         display()
       }
-      if (position.browser[0] > 256*panEast) {
+      if (position.browser[0] > 255*panEast) {
         for (var i = (yVisible + panSouth)*(-1); i < (yVisible + panNorth); i++) {
           tl = ({tms:[zoom0, position.anchor[1] - xVisible - panEast, position.anchor[2] + i]})
           if (!seen[overlay(tl.tms)]) {
@@ -109,7 +109,7 @@ var dragmap = d3.behavior.drag()
         panEast++
         display()
       }
-      if (position.browser[1] < -256*panSouth) {
+      if (position.browser[1] < -255*panSouth) {
         for (var i = (xVisible + panEast)*(-1); i < (xVisible + panWest); i++) {
           tl = ({tms:[zoom0, position.anchor[1] + i, position.anchor[2] + yVisible + panSouth]})
           if (!seen[overlay(tl.tms)]) {
@@ -120,7 +120,7 @@ var dragmap = d3.behavior.drag()
         panSouth++
         display()
       }
-      if (position.browser[1] > 256*panNorth) {
+      if (position.browser[1] > 255*panNorth) {
         for (var i = (xVisible + panEast)*(-1); i < (xVisible + panWest); i++) {
           tl = ({tms:[zoom0, position.anchor[1] + i, position.anchor[2] - yVisible - panNorth]})
           if (!seen[overlay(tl.tms)]) {
@@ -150,10 +150,10 @@ var dragmap = d3.behavior.drag()
 function tilepos (el, tile) {
   d3.select(el)
   .style('top', function () { 
-     return (height/2 + (Number(d3.select(this).attr('row')) - position.anchor[2])*256 + position.browser[1]).toString() + 'px'
+     return (height/2 + (Number(d3.select(this).attr('row')) - position.anchor[2])*255 + position.browser[1]).toString() + 'px'
     })
     .style('left', function () {
-      return (height/2 + (Number(d3.select(this).attr('col')) - position.anchor[1])*256 + position.browser[0]).toString() + 'px'
+      return (height/2 + (Number(d3.select(this).attr('col')) - position.anchor[1])*255 + position.browser[0]).toString() + 'px'
     })
 }
 
@@ -188,8 +188,8 @@ function display () {
    .enter()
     .append("canvas")
     .attr("class", "maptile")
-    .attr("height", "256px")
-    .attr("width", "256px")
+    .attr("height", "255px")
+    .attr("width", "255px")
     .attr("row", function (d) { return d.tms[2] })
     .attr("col", function (d) { return d.tms[1] })
     .style("position", "absolute")

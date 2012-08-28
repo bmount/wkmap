@@ -19,7 +19,8 @@ function tileCoords (pt, zoom, projected) {
 }
 
 function scale (pt, zm, tl) {
-  return Math.abs((pt + 20037508.342789) * (1 << zm) / 156543.033928041 - (tl*256))
+  //return Math.abs((pt + 20037508.342789) * (1 << zm) / 156543.033928041 - (tl*256))
+  return Math.abs((pt + 20037508.342789) * (1 << zm) / 157156.928179 - (tl*255))
 }
 
 function draw (dv, idx, ctx, numRecs, zm, tilePoint) {
@@ -108,7 +109,7 @@ function drawpoly (dv, idx, ctx, numPoints, zm, tilePoint) {
   idx += 16
   ctx.strokeStyle = '#8888'+Math.floor(Math.random()*255).toString(16)
   ctx.lineWidth = .2 + Math.random()
-  var grad = ctx.createLinearGradient(0,0,0,256),
+  var grad = ctx.createLinearGradient(0,0,0,255),
       pm = [1,-1][Math.round(Math.random())]
   grad.addColorStop(0, mkcol())
   grad.addColorStop(.33, mkcol())
@@ -142,6 +143,44 @@ function drawpoly (dv, idx, ctx, numPoints, zm, tilePoint) {
   return idx
 }
 
+function streetstyle (type, ctx) {
+  var types = {
+  "0": { cls: "residential", color: "rgba(200,45,45,.8)", width: 2 },
+  "1": { cls: "bridleway",  color: "rgba(200,45,45,.8)", width: 2 },
+  "2": { cls: "construction", color: "rgba(200,45,45,.8)", width: 2 },
+  "3": { cls: "crossing", color: "rgba(200,45,45,.8)", width: 2 },
+  "4": { cls: "cycleway", color: "rgba(200,45,45,.8)", width: 2 },
+  "5": { cls: "footway", color: "rgba(200,45,45,.8)", width: 2 },
+  "6": { cls: "footway_unconstructed", color: "rgba(200,45,45,.8)", width: 2 },
+  "7": { cls: "living_street", color: "rgba(200,45,45,.8)", width: 2 },
+  "8": { cls: "motorway", color: "rgba(200,45,45,.8)", width: 2 },
+  "9": { cls: "motorway_link", color: "rgba(200,45,45,.8)", width: 2 },
+  "10": { cls: "path", color: "rgba(200,45,45,.8)", width: 2 },
+  "11": { cls: "pedestrian", color: "rgba(200,45,45,.8)", width: 2 },
+  "12": { cls: "platform", color: "rgba(200,45,45,.8)", width: 2 },
+  "13": { cls: "primary", color: "rgba(200,45,45,.8)", width: 2 },
+  "14": { cls: "primary_link",  color: "rgba(200,45,45,.8)", width: 2 },
+  "15": { cls: "proposed",  color: "rgba(200,45,45,.8)", width: 2 },
+  "16": { cls: "raceway",  color: "rgba(200,45,45,.8)", width: 2 },
+  "17": { cls: "abandoned",  color: "rgba(200,45,45,.8)", width: 2 },
+  "18": { cls: "road",  color: "rgba(200,45,45,.8)", width: 2 },
+  "19": { cls: "secondary",  color: "rgba(200,45,45,.8)", width: 2 },
+  "20": { cls: "secondary_link",  color: "rgba(200,45,45,.8)", width: 2 },
+  "21": { cls: "service",  color: "rgba(200,45,45,.8)", width: 2 },
+  "22": { cls: "service; residential",  color: "rgba(200,45,45,.8)", width: 2 },
+  "23": { cls: "steps",  color: "rgba(200,45,45,.8)", width: 2 },
+  "24": { cls: "tertiary",  color: "rgba(200,45,45,.8)", width: 2 },
+  "25": { cls: "tertiary_link",  color: "rgba(200,45,45,.8)", width: 2 },
+  "26": { cls: "track",  color: "rgba(200,45,45,.8)", width: 2 },
+  "27": { cls: "trunk",  color: "rgba(200,45,45,.8)", width: 2 },
+  "28": { cls: "trunk_link",  color: "rgba(200,45,45,.8)", width: 2 },
+  "29": { cls: "unclassified", color: "rgba(200,45,45,.8)", width: 2 },
+  }
+  //function styler (ctx) {
+    ctx.strokeStyle = types[type].color;
+    ctx.linewidth = type[type].width;
+  //}
+  
 
 function line (buf, canvas, tilePoint, zoom, layered) {
   var fullLength = buf.byteLength,
@@ -164,10 +203,39 @@ function line (buf, canvas, tilePoint, zoom, layered) {
     ukbtype = dv.getUint32(drawn, true);
     npts = dv.getUint32(drawn + 4, true);
     osmstyle = dv.getUint32(drawn + 8, true);
-    //console.log(osmstyle)
-    if (osmstyle === 44) {
+    console.log(osmstyle)
+    // some of the more common osm styles, should be separate object
+    if (osmstyle === 0) {
+      ctx.strokeStyle = "rgba(20, 20, 20, .8)";
+      ctx.lineWidth = .5;
+    }
+    else if (osmstyle === 28) {
+      ctx.strokeStyle = "purple" // "rgba(220, 0, 0, .8)";
+      ctx.lineWidth = 4;
+    }
+    else if (osmstyle === 20) {
+      ctx.strokeStyle = "papayawhip" // "rgba(220, 0, 0, .8)";
+      ctx.lineWidth = 4;
+    }
+    else if (osmstyle === 13) {
       ctx.strokeStyle = "rgba(220, 0, 0, .8)";
       ctx.lineWidth = 4;
+    }
+    else if (osmstyle === 18) {
+      ctx.strokeStyle = "darkgrey" // "rgba(220, 0, 0, .8)";
+      ctx.lineWidth = 4;
+    }
+    else if (osmstyle === 5) {
+      ctx.strokeStyle = "rgba(220, 0, 0, .8)";
+      ctx.lineWidth = 4;
+    }
+    else if (osmstyle === 6) {
+      ctx.strokeStyle = "rgba(220, 0, 0, .8)";
+      ctx.lineWidth = 4;
+    }
+    else {
+      ctx.strokeStyle = "rgba(55, 200, 55, .8)";
+      ctx.lineWidth = 2;
     }
     drawn += 12;
     ctx.beginPath()
@@ -196,7 +264,7 @@ function uncollect (buf, canvas, tilePoint, zoom, layered) {
     , numRecs = 0, numPts
     tilePoint.y = ((1 << zoom) - tilePoint.y)
 
-  if (!layered) ctx.clearRect(0,0,256,256)
+  if (!layered) ctx.clearRect(0,0,255,255)
   while (idx < fullLength) { 
     wkbType = dv.getUint32(idx, true)
     if (wkbType === 2) { // probably does

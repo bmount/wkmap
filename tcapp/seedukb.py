@@ -8,6 +8,6 @@ import os
 
 widgeon_url = 'http://localhost:7987/api/tms/{0}/{1}/{2}.ukb'
 
-for i in range(1308, 1312):
-  for j in range(3165, 3168):
+for i in range(1304, 1317):
+  for j in range(3155, 3174):
     os.system("wget -O {0}-{1}-{2}.ukb http://localhost:7987/api/tms/{0}/{1}/{2}.ukb".format(13, i, j))
