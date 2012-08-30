@@ -11,15 +11,15 @@
         position:absolute; 
         height:90%; 
         width:90%; 
-        top:5%; 
+        top:2em; 
         left:5%; 
         border-style: outset;
-        background: rgba(255,255,255,.5); 
+        background-color: 'papayawhip'; /* rgba(5,5,100,.3); */
       }
     </style>      
   </head>
   <body>
-drag around; <a href="http://github.com/bvmou/wkmap">source</a>
+    drag around; <a href="http://github.com/bvmou/wkmap">source</a> <a id=zin>in</a> <a id=zout>out</a>
 <div id=map>
 </div>
 <script>
@@ -36,7 +36,7 @@ var mapContainer = d3.select("#map").node()
 
 var map = wkmap()
   , position = { geography:[-122.46, 37.8], browser:[0,0], anchor: false}
-  , zoom0 = 13
+  , zoom0 = 3
   , height = mapContainer.clientHeight
   , width = mapContainer.clientWidth
   , xVisible = Math.ceil(width/512)  // tile count left, right of center
@@ -195,11 +195,18 @@ function display () {
     .style("position", "absolute")
     .attr("id", function (d) { xharr(d.tms, d3.select(this).node(), map.render);  return 'tile-'+d.tms.join('-') })
     .call(dragmap)
-}
+   //maptiles.exit().remove()
+  }
 
 document.addEventListener("DOMContentLoaded", function () {
-  display(inView)
+  display()
 })
+
+d3.select("#zin").on("click", function () {
+  zoom0++;
+  inView = displayedTiles(map.tile(position.geography, zoom0));
+  display();
+});
 
 </script>
 </body>

@@ -23,46 +23,11 @@ function scale (pt, zm, tl) {
   return Math.abs((pt + 20037508.342789) * (1 << zm) / 157156.928179 - (tl*255))
 }
 
-function draw (dv, idx, ctx, numRecs, zm, tilePoint) {
-  ctx.beginPath()
-  ctx.shadowOffsetX = 2
-  ctx.shadowOffsetY = 2
-  ctx.shadowBlur = .1
-  ctx.lineWidth = 3.5 // + 2*Math.random()*pm
-  ctx.shadowColor = 'rgba(255,255,255,.99)'
-  var n = 1,
-      x = dv.getFloat64(idx, true),
-      y = dv.getFloat64(idx+8, true)
-  idx += 16
-  //ctx.strokeStyle = '#'+Math.floor(Math.random()*16777).toString(16)
-  ctx.strokeStyle = 'rgba(11,11,11,.5)'
-  ctx.moveTo(scale(x, zm, tilePoint.x), scale(y, zm, tilePoint.y))
-  var bzct = []
-  while (n < numRecs) {
-    x = dv.getFloat64(idx, true)
-    y = dv.getFloat64(idx+8, true)
-    n+=1
-    // plainer correct: ctx.lineTo(scale(x, zm, tilePoint.x), scale(y, zm, tilePoint.y))
-    //var qx = scale(x, zm, tilePoint.x),
-    //    qy = scale(y, zm, tilePoint.y),
-    //    pm = [1,-1][Math.round(Math.random())]
-    //ctx.lineWidth = 2 // + 2*Math.random()*pm
-    //ctx.quadraticCurveTo( qx-11*Math.random() * pm, qy+11*Math.random() * pm, qx, qy )
-    ctx.lineTo(scale(x, zm, tilePoint.x), scale(y, zm, tilePoint.y))
-    idx += 16
-  }
-  //ctx.bezierCurveTo.apply(ctx, bzct)
-  ctx.stroke()
-  ctx.closePath()    
-  return idx + 1 // skip next endianness flag
-}
-
-
 function drawflower (x, y, ctx) {
   // example of custom point renderer, here flowers
   // with many random layers and colors
   var outer = 8
-  for (var i = Math.random()*20; i > 0; i-=Math.random()*5) {
+  for (var i = Math.random()*100 + 20; i > 0; i-=Math.random()*25) {
     ctx.beginPath()
     ctx.moveTo(x+i, y+i)
     var twistRule = [1, 1, -1, Math.random()][Math.round(Math.random()*3)]
@@ -71,6 +36,7 @@ function drawflower (x, y, ctx) {
       // ctx.fillStyle = 'rgba('+ Math.round(240 - 100*Math.random()) 
       // + ',' + Math.round(150-50*Math.random()) +',0,.8)'
       ctx.fillStyle = '#'+Math.floor(Math.random()*16777).toString(16)
+      ctx.globalAlpha = .2
       ctx.quadraticCurveTo(x+ (i + outer)*Math.cos(theta+.5), y + (i + outer)*Math.sin(theta+.5),
       x+ i*Math.cos(theta+1), y + i*Math.sin(theta+1))
     }
@@ -93,205 +59,165 @@ function drawpt (dv, idx, ctx, numRecs, zm, tilePoint) {
 function mkcol () {
   return "rgba(" + 
   Math.floor(255*Math.random()) +',' + Math.floor(255*Math.random()) +','+ 
-  12 +',' + .8 + ' )' 
+  12 +',' + .4 + ' )' 
   //Math.floor(255*Math.random())+',' + .9 + ' )' 
 }
 
 
-function drawpoly (dv, idx, ctx, numPoints, zm, tilePoint) {
-  // make any function and pass it to the uncollector
-  // does not assume next record has endianness flag (can be
-  // sequence of linear rings)
-  ctx.beginPath()
-  var n = 1, x, y,
-      x0 = dv.getFloat64(idx, true),
-      y0 = dv.getFloat64(idx+8, true)
-  idx += 16
-  ctx.strokeStyle = '#8888'+Math.floor(Math.random()*255).toString(16)
-  ctx.lineWidth = .2 + Math.random()
-  var grad = ctx.createLinearGradient(0,0,0,255),
-      pm = [1,-1][Math.round(Math.random())]
-  grad.addColorStop(0, mkcol())
-  grad.addColorStop(.33, mkcol())
-  grad.addColorStop(.67, mkcol())
-  grad.addColorStop(1, mkcol())
-  //grad.addColorStop(0, 'rgba(11,11,11,.9)')
-  //grad.addColorStop(1, 'rgba(11,11,11,.1)')
-  ctx.fillStyle = grad
-  //ctx.fillStyle = mkcol()
-  //ctx.fillStyle = '#'+Math.floor(Math.random()*16777).toString(16)
-  ctx.moveTo(scale(x0, zm, tilePoint.x), scale(y0, zm, tilePoint.y))
-  while (n < numPoints) {
-    x = dv.getFloat64(idx, true)
-    y = dv.getFloat64(idx+8, true)
-    n++
-    // plainer correct: ctx.lineTo(scale(x, zm, tilePoint.x), scale(y, zm, tilePoint.y))
-    var qx = scale(x, zm, tilePoint.x),
-        qy = scale(y, zm, tilePoint.y) //,
-        //scaletor = [1, 1, 7, 3, 10, 5, 6][Math.floor(Math.random()*6)]
-    ctx.lineTo( qx, qy )
-    // a little painterly:
-    //ctx.quadraticCurveTo(qx+2*Math.random()*pm, qy+2*Math.random()*pm, qx, qy)
-    //ctx.bezierCurveTo(qx+15, qy+15, qx+2*Math.random()*pm, qy+2*Math.random()*pm, qx, qy)
-    //ctx.bezierCurveTo(qx+scaletor*Math.random()*pm, qy+scaletor*Math.random()*pm, qx+scaletor*Math.random()*pm, qy+scaletor*Math.random()*pm, qx, qy)
-    idx += 16
-  }
-  //ctx.lineTo( x0, y0 )
-  ctx.closePath()    
-  ctx.fill()
-  //ctx.stroke()
-  return idx
-}
-
 function streetstyle (type, ctx) {
   var types = {
-  "0": { cls: "residential", color: "rgba(200,45,45,.8)", width: 2 },
+  "0": { cls: "residential", color: "rgba(15,15,15,.7)", width: .5 },
   "1": { cls: "bridleway",  color: "rgba(200,45,45,.8)", width: 2 },
   "2": { cls: "construction", color: "rgba(200,45,45,.8)", width: 2 },
-  "3": { cls: "crossing", color: "rgba(200,45,45,.8)", width: 2 },
-  "4": { cls: "cycleway", color: "rgba(200,45,45,.8)", width: 2 },
-  "5": { cls: "footway", color: "rgba(200,45,45,.8)", width: 2 },
+  "3": { cls: "crossing", color: "rgba(200,45,45,.8)", width: .1 },
+  "4": { cls: "cycleway", color: "rgba(25,150,25,.6)", width: 1.5 },
+  "5": { cls: "footway", color: "rgba(20,100,20,.8)", width: 1.5 },
   "6": { cls: "footway_unconstructed", color: "rgba(200,45,45,.8)", width: 2 },
-  "7": { cls: "living_street", color: "rgba(200,45,45,.8)", width: 2 },
-  "8": { cls: "motorway", color: "rgba(200,45,45,.8)", width: 2 },
-  "9": { cls: "motorway_link", color: "rgba(200,45,45,.8)", width: 2 },
-  "10": { cls: "path", color: "rgba(200,45,45,.8)", width: 2 },
-  "11": { cls: "pedestrian", color: "rgba(200,45,45,.8)", width: 2 },
-  "12": { cls: "platform", color: "rgba(200,45,45,.8)", width: 2 },
-  "13": { cls: "primary", color: "rgba(200,45,45,.8)", width: 2 },
-  "14": { cls: "primary_link",  color: "rgba(200,45,45,.8)", width: 2 },
+  "7": { cls: "living_street", color: "rgba(200,45,45,.8)", width: .2 },
+  "8": { cls: "motorway", color: "rgba(200,45,45,.8)", width: 3 },
+  "9": { cls: "motorway_link", color: "rgba(200,45,45,.8)", width: 3 },
+  "10": { cls: "path", color: "rgba(200,45,45,.8)", width: 10 },
+  "11": { cls: "pedestrian", color: "rgba(200,45,45,.8)", width: .5 },
+  "12": { cls: "platform", color: "rgba(200,45,45,.8)", width: .2 },
+  "13": { cls: "primary", color: "rgba(200,45,45,.8)", width: 3 },
+  "14": { cls: "primary_link",  color: "rgba(200,45,45,.8)", width: 3 },
   "15": { cls: "proposed",  color: "rgba(200,45,45,.8)", width: 2 },
   "16": { cls: "raceway",  color: "rgba(200,45,45,.8)", width: 2 },
   "17": { cls: "abandoned",  color: "rgba(200,45,45,.8)", width: 2 },
-  "18": { cls: "road",  color: "rgba(200,45,45,.8)", width: 2 },
-  "19": { cls: "secondary",  color: "rgba(200,45,45,.8)", width: 2 },
+  "18": { cls: "road",  color: "rgba(200,200,45,.8)", width: 10 },
+  "19": { cls: "secondary",  color: "rgba(200,200,45,.8)", width: 10 },
   "20": { cls: "secondary_link",  color: "rgba(200,45,45,.8)", width: 2 },
-  "21": { cls: "service",  color: "rgba(200,45,45,.8)", width: 2 },
-  "22": { cls: "service; residential",  color: "rgba(200,45,45,.8)", width: 2 },
+  "21": { cls: "service",  color: "rgba(200,45,45,.8)", width: .2 },
+  "22": { cls: "service; residential",  color: "rgba(200,45,45,.8)", width: .2 },
   "23": { cls: "steps",  color: "rgba(200,45,45,.8)", width: 2 },
   "24": { cls: "tertiary",  color: "rgba(200,45,45,.8)", width: 2 },
   "25": { cls: "tertiary_link",  color: "rgba(200,45,45,.8)", width: 2 },
   "26": { cls: "track",  color: "rgba(200,45,45,.8)", width: 2 },
   "27": { cls: "trunk",  color: "rgba(200,45,45,.8)", width: 2 },
   "28": { cls: "trunk_link",  color: "rgba(200,45,45,.8)", width: 2 },
-  "29": { cls: "unclassified", color: "rgba(200,45,45,.8)", width: 2 },
+  "29": { cls: "unclassified", color: "rgba(200,45,45,.8)", width: .2 },
   }
-  //function styler (ctx) {
-    ctx.strokeStyle = types[type].color;
-    ctx.linewidth = type[type].width;
-  //}
-  
+  ctx.globalAlpha = 1
+  ctx.strokeStyle = types[type].color;
+  ctx.lineWidth = types[type].width;
+}
 
-function line (buf, canvas, tilePoint, zoom, layered) {
+function uncollect(buf, canvas, tilePoint, zoom, layered) {
   var fullLength = buf.byteLength,
       drawn = 0,
       ctx = canvas.getContext('2d'),
-      uktype, npts, view, forematter, x, y, px, py, ctx, osmstyle;
-  ctx.shadowOffsetX = 3
-  ctx.shadowOffsetY = 2
-  ctx.shadowBlur = 5
-  ctx.shadowColor = "rgba(200,200,200,.1)";
-  ctx.lineWidth = 2;
-  ctx.strokeStyle = "rgba(21,21,210,.8)";
-
-  var dv = new DataView(buf, 0, fullLength),
-      nstyles = 0
+      ukbtype, nsubgeoms, view, forematter, x, y, px, py,
+    dv = new DataView ( buf, 0, fullLength );
   while (drawn < fullLength) {
-    ctx.lineWidth = 2; // base style for osm residential
-    ctx.strokeStyle = "rgba(2,21,110,.6)";
-    //ctx.strokeStyle = "rgba(29,29,29,.8)";
-    ukbtype = dv.getUint32(drawn, true);
-    npts = dv.getUint32(drawn + 4, true);
-    osmstyle = dv.getUint32(drawn + 8, true);
-    console.log(osmstyle)
-    // some of the more common osm styles, should be separate object
-    if (osmstyle === 0) {
-      ctx.strokeStyle = "rgba(20, 20, 20, .8)";
-      ctx.lineWidth = .5;
+    //try {
+      ukbtype = dv.getUint32(drawn, true);
+      nsubgeoms = dv.getUint32(drawn + 4, true);
+    //} catch (e) {
+    //  return;
+    //}
+    if (ukbtype === 2) {
+      if (nsubgeoms > 0) {
+        //drawn = polygon ( dv, (drawn+4), ctx );
+        drawn = line( dv, (drawn+4), ctx );
+      } else {
+        drawn += 12;
+      }
     }
-    else if (osmstyle === 28) {
-      ctx.strokeStyle = "purple" // "rgba(220, 0, 0, .8)";
-      ctx.lineWidth = 4;
-    }
-    else if (osmstyle === 20) {
-      ctx.strokeStyle = "papayawhip" // "rgba(220, 0, 0, .8)";
-      ctx.lineWidth = 4;
-    }
-    else if (osmstyle === 13) {
-      ctx.strokeStyle = "rgba(220, 0, 0, .8)";
-      ctx.lineWidth = 4;
-    }
-    else if (osmstyle === 18) {
-      ctx.strokeStyle = "darkgrey" // "rgba(220, 0, 0, .8)";
-      ctx.lineWidth = 4;
-    }
-    else if (osmstyle === 5) {
-      ctx.strokeStyle = "rgba(220, 0, 0, .8)";
-      ctx.lineWidth = 4;
-    }
-    else if (osmstyle === 6) {
-      ctx.strokeStyle = "rgba(220, 0, 0, .8)";
-      ctx.lineWidth = 4;
+    else if (ukbtype === 3) {
+      //drawn = line ( dv, drawn+4, ctx );
+      drawn = polygon ( dv, drawn+4, ctx );
     }
     else {
-      ctx.strokeStyle = "rgba(55, 200, 55, .8)";
-      ctx.lineWidth = 2;
+      ukbtype = 0;
+      //return;
+      drawn += 12;
     }
-    drawn += 12;
-    ctx.beginPath()
-    ctx.moveTo(dv.getUint8(drawn, true), 255 - dv.getUint8(drawn+1, true));
-    for (var i = 2; i < npts*2; i += 2) {
-      ctx.lineTo(dv.getUint8(drawn + i, true), 255 - dv.getUint8(drawn + i + 1, true));
+
+  }
+}
+
+function xxpolygonxx (dv, idx, ctx) {
+  var nlinearrings = dv.getUint32(idx, true),
+      k = 4;
+  while (nlinearrings) {
+    npts = dv.getUint32(idx + k, true);
+    k += 4
+    ctx.moveTo(dv.getUint8(idx, true), dv.getUint8(idx + 1, true));
+    for (var i = 0; i < (npts*2); i += 2 ) {
+      ctx.moveTo(dv.getUint8(idx + k + i, true), dv.getUint8(idx + k + i + 1, true));
     }
+    k += npts*2;
+    ctx.stroke();
+    ctx.fill();
+    nlinearrings--;
+  }
+  return idx;
+}
+
+function polygon (dv, idx, ctx) {
+  var drawn = 0,
+      idx = idx,
+      npts = dv.getUint32(idx, true),
+      osmstyle = dv.getUint32(idx + 4, true);
+  idx += 8;
+  if (npts === 0) {
+    console.log('zz')
+    return idx;
+  }
+  ctx.strokeStyle = '#fff' // "rgba(200, 2, 2, 1)";
+  ctx.fillStyle = mkcol(); // "rgba(200, 200, 2, .51)";
+  ctx.moveTo(dv.getUint8(idx, true), 255 - dv.getUint8( idx + 1, true));
+  ctx.beginPath();
+  var x0 = dv.getUint8(idx, true),
+      y0 = 255 - dv.getUint8(idx + 1, true);
+  idx += 2;
+  if (npts === 2) {
+    ctx.lineTo(dv.getUint8(idx, true), 255 - dv.getUint8( idx + 1, true));
     ctx.closePath()
     ctx.stroke()
-    nstyles++
-    drawn += npts*2;
-  
+    return idx + 2;
   }
+  //console.log(idx)
+  for (var i = 2; i < 2*(npts - 1); i += 2) {
+    ctx.lineTo(dv.getUint8(idx + i, true), 255 - dv.getUint8( idx + i + 1, true));
+  }
+  ctx.lineTo(x0, y0);
+  ctx.closePath();
+  ctx.stroke();
+  ctx.fill()
+  //drawn += 2*npts;
+  //console.log(idx);
+  return idx + 2*(npts - 1);
 }
 
-
-function uncollect (buf, canvas, tilePoint, zoom, layered) {
-  var fullLength = buf.byteLength
-    , ctx = canvas.getContext('2d')
-    , idx = 1 // assume little endian
-    , dv = new DataView(buf)
-    , yTileMax = 1 << tilePoint.y
-    , tileY = yTileMax - tilePoint.y
-    , wkbType, linearRings
-    , polygons = 0, multiLength = 0
-    , numRecs = 0, numPts
-    tilePoint.y = ((1 << zoom) - tilePoint.y)
-
-  if (!layered) ctx.clearRect(0,0,255,255)
-  while (idx < fullLength) { 
-    wkbType = dv.getUint32(idx, true)
-    if (wkbType === 2) { // probably does
-      numRecs = dv.getUint32(idx + 4, true)
-      idx = draw (dv, idx + 8, ctx, numRecs, zoom, tilePoint)
-    }
-    else if (wkbType === 1) {
-      idx = drawpt (dv, idx + 4, ctx, numRecs, zoom, tilePoint)
-    }
-    else if (wkbType === 3) {
-      linearRings = dv.getUint32(idx + 4, true)
-      idx += 8
-      while (linearRings) {
-        // optionally, some other callback for polygons:
-        idx = drawpoly (dv, idx + 4, ctx, dv.getUint32(idx, true), zoom, tilePoint) // +1 
-        linearRings--
-      }
-      idx += 1 // resume endianness ignoring
-    }
-    else if (wkbType > 3) { 
-      idx += 9 // blow through array uncollecting it
-      continue
-    }
+function line (dv, idx, ctx) {
+  var drawn = 0,
+      idx = idx,
+      npts = dv.getUint32(idx, true),
+      osmstyle = dv.getUint32(idx + 4, true);
+  //streetstyle(osmstyle, ctx);
+  ctx.lineWidth = 2;
+  ctx.strokeStyle = 'rgba(200, 2, 2, .6)';
+  idx += 8;
+  ctx.beginPath();
+  ctx.moveTo(dv.getUint8(idx, true), 255 - dv.getUint8( idx + 1, true));
+  idx += 2;
+  if (npts === 2) {
+    ctx.lineTo(dv.getUint8(idx, true), 255 - dv.getUint8( idx + 1, true));
+    ctx.closePath()
+    ctx.stroke()
+    return idx + 2;
   }
+  for (var i = 2; i < 2*(npts - 1); i += 2) {
+    ctx.lineTo(dv.getUint8(idx + i, true), 255 - dv.getUint8( idx + i + 1, true));
+  }
+  ctx.closePath();
+  ctx.stroke();
+  //drawn += 2*npts;
+  return idx + 2*(npts - 1);
 }
 
-return { tile:tileCoords, render:line }
+return { tile:tileCoords, render:uncollect }
 
 }
 
