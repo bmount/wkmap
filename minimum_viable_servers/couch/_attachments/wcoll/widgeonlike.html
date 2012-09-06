@@ -22,7 +22,7 @@
       button { z-index: 3; }
     </style>      
   </head>
-  <body> <button id=bmw>bbutton</button>
+  <body> <button id=neeear>neeear</button><button id=faaaar>faaaar</button>
 <div id=map>
 </div>
 <script>
@@ -185,9 +185,9 @@ function xharr (tile, el, callback) { // tee hee
 var inView = displayedTiles(map.tile(position.geography, zoom0))
 
 // will be once per layer
-function display (tiles) {
+function display () {
   d3.select("#map").selectAll("canvas")
-    .data(tiles)
+    .data(inView)
    .enter()
     .append("canvas")
     .attr("class", "maptile")
@@ -222,20 +222,22 @@ d3.select("#hike").on("click", function (evt) {
 })
 
 var tog_beemer = toggler()
-d3.select("#bmw").on("click", function (evt) {
+d3.select("#neeear").on("click", function (evt) {
   var beemtog = tog_beemer()
   zoom0++;
   d3.selectAll("canvas").remove()
   position = { geography:[-122.46, 37.8], browser:[0,0], anchor: false}
   inView = displayedTiles(map.tile(position.geography, zoom0))
   display(inView);
-  //map.streetstyle["0"].width = beemtog? 2: 1;
-  //map.streetstyle["0"].color = beemtog? 'rgba(0, 25, 25, .8)': 'rgba(11,11,11,.5)';
-  //var mtrn = document.querySelector("#map");
-  //mtrn.style.webkitTransform = 'perspective(1200px) rotateX('+ (beemtog? '-45deg': '45deg') + ')'
-  //for (var i in wkbCache) {
-  //    map.renderslow(wkbCache[i].binrv, wkbCache[i].el)
-  //}
+})
+
+d3.select("#faaaar").on("click", function (evt) {
+  var beemtog = tog_beemer()
+  zoom0--;
+  d3.selectAll("canvas").remove()
+  position = { geography:[-122.46, 37.8], browser:[0,0], anchor: false}
+  inView = displayedTiles(map.tile(position.geography, zoom0))
+  display(inView);
 })
 
 </script>
