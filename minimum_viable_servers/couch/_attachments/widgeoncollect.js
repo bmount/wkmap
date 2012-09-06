@@ -181,8 +181,8 @@ function polygon (dv, idx, ctx) {
   for (var i = 2; i < 2*(npts - 1); i += 2) {
     ctx.lineTo(dv.getUint8(idx + i, true), 255 - dv.getUint8( idx + i + 1, true));
   }
-  ctx.lineTo(x0, y0);
-  ctx.closePath();
+  //ctx.lineTo(x0, y0);
+  //ctx.closePath();
   ctx.stroke();
   ctx.fill()
   //drawn += 2*npts;
@@ -195,9 +195,9 @@ function line (dv, idx, ctx) {
       idx = idx,
       npts = dv.getUint32(idx, true),
       osmstyle = dv.getUint32(idx + 4, true);
-  //streetstyle(osmstyle, ctx);
-  ctx.lineWidth = 2;
-  ctx.strokeStyle = 'rgba(200, 2, 2, .6)';
+  streetstyle(osmstyle, ctx);
+  //ctx.lineWidth = .4;
+  //ctx.strokeStyle = 'rgba(200, 2, 2, .6)';
   idx += 8;
   ctx.beginPath();
   ctx.moveTo(dv.getUint8(idx, true), 255 - dv.getUint8( idx + 1, true));
@@ -211,7 +211,7 @@ function line (dv, idx, ctx) {
   for (var i = 2; i < 2*(npts - 1); i += 2) {
     ctx.lineTo(dv.getUint8(idx + i, true), 255 - dv.getUint8( idx + i + 1, true));
   }
-  ctx.closePath();
+  //ctx.closePath();
   ctx.stroke();
   //drawn += 2*npts;
   return idx + 2*(npts - 1);

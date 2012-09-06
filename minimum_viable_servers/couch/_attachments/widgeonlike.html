@@ -35,8 +35,8 @@ var mapContainer = d3.select("#map").node()
 */
 
 var map = wkmap()
-  , position = { geography:[-122.46, 37.8], browser:[0,0], anchor: false}
-  , zoom0 = 3
+  , position = { geography:[-122.419598, 37.764906], browser:[0,0], anchor: false}
+  , zoom0 = 13
   , height = mapContainer.clientHeight
   , width = mapContainer.clientWidth
   , xVisible = Math.ceil(width/512)  // tile count left, right of center
@@ -205,7 +205,8 @@ document.addEventListener("DOMContentLoaded", function () {
 d3.select("#zin").on("click", function () {
   zoom0++;
   inView = displayedTiles(map.tile(position.geography, zoom0));
-  display();
+  d3.timer(display);
+ // display();
 });
 
 </script>
