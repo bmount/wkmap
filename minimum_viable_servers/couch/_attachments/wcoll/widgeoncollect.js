@@ -180,7 +180,7 @@ function slowline (buf, canvas, tilePoint, zoom, layered) {
   }
 }
 
-return { tile:tileCoords, render:line, renderslow:slowline, streetstyle:streetstyle }
+return { tile:tileCoords, render:line, streetstyle:streetstyle }
 
 }
 
