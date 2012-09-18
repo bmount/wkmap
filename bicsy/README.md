@@ -1,3 +1,7 @@
+Example rendering to single canvas.
+
+## original pixymaps readme follows
+
 Experimental canvas-based mapping library.
 
 Two quick demos:
