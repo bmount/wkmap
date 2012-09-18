@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="bicsymaps.js"></script>
+    <script src="d3.v2.min.js"></script>
+    
+<!--
+    Bicsymaps is based on github.com/mbostock/pixymaps and
+    the NY Bic map by Vizzuality github.com/vizzuality/VECNIK
+    source at http://github.com/bvmou wkmap and canvasback
+
+    <script type="text/javascript" src="../../bicsymaps.js"></script>
+    <script type="text/javascript" src="../../lib/d3/d3.js"></script>
+    <script type="text/javascript" src="../../lib/d3/d3.geo.js"></script>
+-->
+
+<style>
+body {
+  position: absolute;
+  font: 10px sans-serif;
+  background: rgba(10,10,10,.9);
+  /*
+  background: url("Paper-6.png");
+  background: url("grass_texture.jpg");
+  background: url("pt3.png");
+  */
+  height: 100%;
+  width: 100%;
+}
+#controls {
+  top: 0px;
+  z-index: 5;
+}
+#copy {
+  position: absolute;
+  bottom: 2em;
+}
+
+#mapcontainer {
+  z-index: 4;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 3em;
+  overflow: hidden;
+  bottom: 2em;
+  /*
+  transform: perspective(1200px) rotateX(25deg);
+  -webkit-transform: perspective(1200px) rotateX(35deg);
+  */
+  /*
+  top: -25%;
+  left: -10%;
+  bottom -20%;
+  top: -30%;
+  position: absolute;
+  overflow: hidden;
+  */
+}
+canvas { 
+  background: rgba(0,0,0,0);
+}
+
+
+
+
+</style>
+  </head>
+  <body>
+    <div id="mapcontainer">
+      <canvas id="map"></canvas>
+    </div>
+<div id="controls" height=2em>
+  <button id=zin>neeear</button>
+  <button id=zout>faaar</button>
+</div>
+    <script type="text/javascript">
+
+function llFromHash (lstr) {
+  var rv = [];
+  lstr.replace("#", "").split('/').forEach(function (e, i) { rv[i] = Number(e); });
+  return rv;
+}
+
+function setMap (h, w, z, recenter) {
+  var hloc = window.location.hash;
+  var permaloc = [z, -122.46, 37.8]
+  //var permaloc = [z, -73.9685, 40.7274]
+  hloc = hloc? llFromHash(hloc): [z, -73.9685, 40.7274]
+  var z = z || 13
+  var canvas = d3.select("#map")
+    .attr("width", "100%")
+    .attr("height", "100%")
+    .style("overflow", "hidden")
+    .call(drag),
+    context = canvas.node().getContext("2d");
+
+var w = w + 255,
+    h = h + 255,
+    lat = permaloc[2],
+    lon = permaloc[1]
+    //lat = hloc[2],
+    //lon = hloc[1]
+    
+    //lon = -122.43948,
+    //lat = 37.739;
+
+var project = d3.geo.mercator()
+    .scale(1)
+    .translate([.5, .5]);
+
+var view = bicsymaps.view()
+    .size([w, h])
+    .center(project([lon, lat]))
+    .zoom(z);
+
+//if (recenter) { view.center(recenter)); }
+
+var image = bicsymaps.image()
+    .view(view)
+  .url(bicsymaps.url("/_canvasback/tms/{Z}/{X}/{Y}.ukb"))
+    .render(canvas.node());
+
+var loaderPid = window.setInterval(function () {
+    image.render(canvas.node());
+  }, 500);
+
+window.setTimeout(function () {
+    window.clearInterval(loaderPid);
+  }, 4000);
+
+function drag(selection) {
+  var p0;
+
+  selection.on("mousedown", mousedown);
+  d3.select(window).on("mousemove", mousemove).on("mouseup", mouseup);
+
+  function mousedown() {
+    p0 = [d3.event.pageX, d3.event.pageY];
+    if (p0 && (p0[0] > 100) && (p0[1] > 50)) {
+      d3.event.preventDefault();
+    }
+  }
+
+  function mousemove() {
+    if (p0 && (d3.event.pageX > 100) && (d3.event.pageY > 50)) {
+      var p1 = [d3.event.pageX, d3.event.pageY],
+          trans = [p1[0] - p0[0], p1[1] - p0[1]];
+      view.panBy([p1[0] - p0[0], p1[1] - p0[1]]);
+      window.location.hash = String(z) + "/" + view.center()[0].toString() + "/" + view.center()[1].toString()
+      image.render(canvas.node());
+      //console.log(p0, p1)
+      p0 = p1;
+      d3.event.preventDefault();
+    }
+  }
+
+  function mouseup() {
+    if (p0) {
+      p0 = null;
+      d3.event.preventDefault();
+    }
+  }
+}
+
+
+return { view:view, zoom:z, project:project };
+}
+
+document.addEventListener("DOMContentLoaded", function () { 
+    var h = document.body.clientHeight
+      , w = document.body.clientWidth;
+    console.log(h, w);
+    document.wkmap = setMap(h, w, 13);
+    d3.select("#zin").on("click", function (evt) {
+      document.wkmap = setMap(h, w, document.wkmap.zoom+1 ); //, llFromHash(window.location.hash).splice(1,3));
+      console.log(h, w, document.wkmap.zoom+1, llFromHash(window.location.hash).splice(1,3));
+      console.log(this, document.wkmap.view )
+    });
+    d3.select("#zout").on("click", function (evt) {
+      document.wkmap = setMap(h, w, document.wkmap.zoom-1 ); //, llFromHash(window.location.hash).splice(1,3));
+      console.log(h, w, document.wkmap.zoom+1, llFromHash(window.location.hash).splice(1,3));
+      console.log(this, document.wkmap.view )
+    });
+  });
+
+
+</script>
+
+    <div id="copy">
+      &copy; 2011
+      <a href="http://github.com/bvmou">see wkmap and canvasback</a> (Requires recent WebKit | FF 15+ | 
+      ie 10 according to rumor.)
+    </div>
+    <script>    
+
+</script>
+  </body>
+</html>
+
