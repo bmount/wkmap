@@ -2,12 +2,20 @@
 
 [slippy example](http://ricos.aguacat.es/mapixy/_design/ofm/widgeonlike.html)
 
-Sort of like a tiled geojson vector layer, but using OGC binary formats and 
-JavaScript ArrayBuffers and DataViews. Uses PostGIS queries inspired by
-Vizzuality/CartoDB's Vecnik project, and trying to apply that kind of cacheing
-to the server component of this. Any ideas, issues, happily welcomed.
+Sort of like a tiled geojson vector layer, but using binary formats and 
+JavaScript ArrayBuffers and DataViews. Inspired by
+Vizzuality/CartoDB's Vecnik project, using a very simple format based on OGC WKB. (There is a pure WKB version at tag `wellknownbinary`.)
+The underlying representation of the geometries is described in sister project
+readme `canvasback`. This project takes canvasback's `ArrayBuffer` based
+ tile map service and renders them to canvas. 
 
-Live examples here: http://wkb.guacamol.es/osmwkb/_design/osmstreets/all.html
+There are maybe a couple ways to do that: two versions are here 
+in 1) `bicsy` and 2) `widgeon`. The former is lightly modified from
+mbostock/pixymaps and renders to a single canvas, the latter is
+one canvas per tile in a map container element. Fingers crossed for
+`d3.geom.tile` which is also like pixymaps and is in the d3 tracker.
+
+(old) Live examples here: http://wkb.guacamol.es/osmwkb/_design/osmstreets/all.html
 
 Very alpha, will have an interaction component inspired by this: https://github.com/bloomtime/d3map
 
