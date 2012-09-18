@@ -30,7 +30,8 @@ function bicsymaps_queue(uri, callback) {
           gcan.height = 255;
           gcan.width = 255;
           if (buf.response === null) {
-            end();
+            //end();
+            return;
           } else {
             var gsrc = uncollect(buf.response, gcan).toDataURL();
             var image = new Image();

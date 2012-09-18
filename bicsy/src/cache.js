@@ -50,6 +50,7 @@ function bicsymaps_cache(key, callback) {
     var callbacks = value.callbacks;
     delete value.callbacks; // must be deleted before callback!
     value.value = image;
+    //callbacks[0](image);
     callbacks.forEach(function(callback) { callback(image); });
   });
 };

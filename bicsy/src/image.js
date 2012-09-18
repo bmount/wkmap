@@ -72,6 +72,12 @@ bicsymaps.image = function() {
 
       // If there's something to show for this tile, show it.
       return key == null ? done() : bicsymaps_cache(key, function(image) {
+        var xi = dx * (tile[0] - x0)
+          , yi = dy * (tile[1] - y0);
+        //if (image)
+        //console.log(image instanceof Image);
+        //if (!image) { done(); return; }
+        //context.clearRect(xi, yi, xi - 255, yi - 255);
         context.drawImage(image, dx * (tile[0] - x0), dy * (tile[1] - y0));
         done();
       });
