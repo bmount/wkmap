@@ -1,0 +1,215 @@
+<!doctype html>
+
+<html> <!--:url('static/bg/pt3.png')  -->
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <script src="widgeoncollect.js"></script>
+    <script src="script/d3.v2.min.js"></script>
+    <style>
+      #map { 
+        overflow:hidden; 
+        position:absolute; 
+        height:90%; 
+        width:90%; 
+        top:2em; 
+        left:5%; 
+        border-style: outset;
+        background-color: 'papayawhip'; /* rgba(5,5,100,.3); */
+      }
+    </style>      
+  </head>
+  <body>
+    drag around; <a href="http://github.com/bvmou/wkmap">source</a> <a id=zin>in</a> <a id=zout>out</a>
+<div id=map>
+</div>
+<script>
+
+var mapContainer = d3.select("#map").node()
+
+/*  wkmap returns object with 2 functions:
+    1) `tile` function that takes [[lon, lat], zoom] and returns its tms tile [Z, X, Y],
+    2)  a `render` function that takes a Well-Known Binary ArrayBuffer, a canvas element, a tile
+    coordinate object of the form {x: TMS-X-Coord, y: TMS-Y-Coord}, and a Zoom (integer).
+
+    The dom stuff is all d3.js and is partly an exercise in studying that library
+*/
+
+var map = wkmap()
+  , position = { geography:[-122.419598, 37.764906], browser:[0,0], anchor: false}
+  , zoom0 = 13
+  , height = mapContainer.clientHeight
+  , width = mapContainer.clientWidth
+  , xVisible = Math.ceil(width/512)  // tile count left, right of center
+  , yVisible = Math.ceil(height/512) 
+  , wkbCache = {}
+  
+function provider (baseUrl, delimiter) {
+  function mkurl (tile) {
+    return baseUrl + tile.join(delimiter)+'.wkb'
+  }
+  return mkurl
+}
+
+//var overlay = provider("", '-')
+var overlay = provider("/_canvasback/tms/", "/")
+
+function displayedTiles (ctr, xmin, ymin, xmax, ymax) {
+  if (!position.anchor) position.anchor = ctr
+  var rv = []
+    , xmin = xmin || (xVisible * -1)
+    , ymin = ymin || (yVisible * -1)
+    , xmax = xmax || xVisible
+    , ymax = ymax || yVisible
+  for (var i = xmin; i <= xmax; i++) {
+    for (var j = ymin; j <= ymax; j++) {
+      rv.push({tms:[ctr[0], ctr[1]+i, ctr[2]+j], 
+        pos:[i,j]})
+    }
+  }
+  return rv
+}
+
+var seen = {}
+
+/*
+sf osm extract extent: NW 13-1314-3159 SE 13-1319-3174
+*/
+
+
+var panWest = 1
+  , panEast = 1
+  , panSouth = 1
+  , panNorth = 1
+
+function panEdge(d) {}  
+var tl
+var dragmap = d3.behavior.drag()
+    .on("drag", function (d, i) {
+      position.browser[0] += d3.event.dx
+      position.browser[1] += d3.event.dy
+      if (position.browser[0] < -255*panWest) {
+        for (var i = (yVisible + panSouth)*(-1); i < (yVisible + panNorth); i++) {
+          tl = ({tms:[zoom0, position.anchor[1] + xVisible + panWest, position.anchor[2] + i]})
+          if (!seen[overlay(tl.tms)]) {
+            inView.push(tl)
+            seen[overlay(tl.tms)] = true
+          }
+        }
+        panWest++
+        display()
+      }
+      if (position.browser[0] > 255*panEast) {
+        for (var i = (yVisible + panSouth)*(-1); i < (yVisible + panNorth); i++) {
+          tl = ({tms:[zoom0, position.anchor[1] - xVisible - panEast, position.anchor[2] + i]})
+          if (!seen[overlay(tl.tms)]) {
+            inView.push(tl)
+            seen[overlay(tl.tms)] = true
+          }
+        }
+        panEast++
+        display()
+      }
+      if (position.browser[1] < -255*panSouth) {
+        for (var i = (xVisible + panEast)*(-1); i < (xVisible + panWest); i++) {
+          tl = ({tms:[zoom0, position.anchor[1] + i, position.anchor[2] + yVisible + panSouth]})
+          if (!seen[overlay(tl.tms)]) {
+            inView.push(tl)
+            seen[overlay(tl.tms)] = true
+          }
+        }
+        panSouth++
+        display()
+      }
+      if (position.browser[1] > 255*panNorth) {
+        for (var i = (xVisible + panEast)*(-1); i < (xVisible + panWest); i++) {
+          tl = ({tms:[zoom0, position.anchor[1] + i, position.anchor[2] - yVisible - panNorth]})
+          if (!seen[overlay(tl.tms)]) {
+            inView.push(tl)
+            seen[overlay(tl.tms)] = true
+          }
+        }
+        panNorth++
+        display()
+      }
+
+      d3.selectAll(".maptile")
+        .style("top", function () {
+              return (parseInt(d3.select(this).node().style.top) + 
+                      d3.event.dy).toString() + 'px'
+        })
+        .style("left", function () {
+              return (parseInt(d3.select(this).node().style.left) + 
+                      d3.event.dx).toString() + 'px'
+        })
+      })
+ 
+
+// this should become something like modestmaps concept of provider
+// better version along those lines in master/minimum_viable_servers/couch
+
+function tilepos (el, tile) {
+  d3.select(el)
+  .style('top', function () { 
+     return (height/2 + (Number(d3.select(this).attr('row')) - position.anchor[2])*255 + position.browser[1]).toString() + 'px'
+    })
+    .style('left', function () {
+      return (height/2 + (Number(d3.select(this).attr('col')) - position.anchor[1])*255 + position.browser[0]).toString() + 'px'
+    })
+}
+
+
+function xharr (tile, el, callback) { // tee hee
+  var buf = new XMLHttpRequest
+    , url = overlay(tile)
+  if (url in wkbCache) {
+    callback(wkbCache[url], el, {x:tile[1], y:tile[2]}, tile[0])
+    return
+  }
+  buf.open("GET", url, true)
+  buf.responseType = 'arraybuffer'
+  buf.onload = function (evt) {
+    if ('function' === typeof callback && buf.response) {
+      wkbCache[url] = buf.response
+      tilepos(el, tile)
+      callback(buf.response, el, {x:tile[1], y:tile[2]}, tile[0])
+    } else { 
+    }
+  }
+  buf.send(null)
+  return el
+}
+
+var inView = displayedTiles(map.tile(position.geography, zoom0))
+
+// will be once per layer
+function display () {
+  d3.select("#map").selectAll("canvas")
+    .data(inView)
+   .enter()
+    .append("canvas")
+    .attr("class", "maptile")
+    .attr("height", "255px")
+    .attr("width", "255px")
+    .attr("row", function (d) { return d.tms[2] })
+    .attr("col", function (d) { return d.tms[1] })
+    .style("position", "absolute")
+    .attr("id", function (d) { xharr(d.tms, d3.select(this).node(), map.render);  return 'tile-'+d.tms.join('-') })
+    .call(dragmap)
+   //maptiles.exit().remove()
+  }
+
+document.addEventListener("DOMContentLoaded", function () {
+  display()
+})
+
+d3.select("#zin").on("click", function () {
+  zoom0++;
+  inView = displayedTiles(map.tile(position.geography, zoom0));
+  d3.timer(display);
+ // display();
+});
+
+</script>
+</body>
+</html>
+
