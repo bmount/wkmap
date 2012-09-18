@@ -1,3 +1,2 @@
-Widgeon is a species of duck, hoping to make a habit of naming d3-based modules after ducks.
+This example pulls its source geometries from a `canvasback` server sitting behind a couchdb http proxy at `_canvasback`, with the html documents just stored in the db as attachments.
 
-Canvasback, a related project, is also named after a duck, but I was not really hip to d3 or the d3-duck connection when it was created.
