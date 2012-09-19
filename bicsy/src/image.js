@@ -66,6 +66,8 @@ bicsymaps.image = function() {
     canvas.width = (x1 - x0) * dx;
     canvas.height = (y1 - y0) * dy;
 
+    var seen = {};
+
     // load each tile (hopefully from the cache) and draw it to the canvas
     tiles.forEach(function(tile) {
       var key = url(tile);
@@ -78,7 +80,10 @@ bicsymaps.image = function() {
         //console.log(image instanceof Image);
         //if (!image) { done(); return; }
         //context.clearRect(xi, yi, xi - 255, yi - 255);
-        context.drawImage(image, dx * (tile[0] - x0), dy * (tile[1] - y0));
+        if (!seen[key]) {
+          context.drawImage(image, dx * (tile[0] - x0), dy * (tile[1] - y0));
+          seen[key] = true;
+        }
         done();
       });
 
