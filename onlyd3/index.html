@@ -68,11 +68,11 @@ function load(tile, canvas) {
     if (buf.readyState === 4) {
       if (buf.status === 200) {
         if (buf.response === null) {
-          delete sq[tile.toString()]
+          delete sq[tile]
           return;
         } else {
           uncollect(buf.response, canvas);
-          delete sq[tile.toString()]
+          delete sq[tile]
           //d3.select(canvas).attr("class", "tile")
         }
       }
@@ -95,29 +95,22 @@ function zoomed() {
       .data(tiles, function(d) { return d; });
 
   image.exit()
-  .remove().filter(function (rmed) {
+    .remove()
+  /*.filter(function (rmed) {
         if (rmed) {
           var idarr = rmed.toString()
-          //if (sq[idarr]) sq[idarr].abort()
+            if (sq[idarr]) sq[idarr].abort()
         }
-    })
-
-/*  .forEach(function (rr) {
-        console.log(rr)
-        rr = d3.select(rr).node()
-        try {
-            console.log('removing', sq[rr.__data__.join(',')])
-            //sq[rr.__data__.join(',')].abort()
-    } catch (e) { }})
-    */
+      })
+  */
 
   image.enter().append("canvas")
       .attr("class", "tile")
       .attr("height", "255px")
       .attr("width", "255px")
       .attr("id", function(d) { 
-          if (!sq[d.toString()]) sq[d.toString()] = load(d, this); 
-          return d.toString() 
+          if (!sq[d]) sq[d] = load(d, this); 
+          return d
       })
       .style("left", function(d) { return (d[0] << 8) + "px"; })
       .style("top", function(d) { return (d[1] << 8) + "px"; });
