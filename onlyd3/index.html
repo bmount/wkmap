@@ -18,8 +18,8 @@ body {
 
 .tile {
   position: absolute;
-  width: 255px;
-  height: 255px;
+  width: 256px;
+  height: 256px;
 }
 
 </style>
@@ -32,7 +32,6 @@ body {
 
 var TMS_URL = '/_canvasback/tms'
 
-var sq = {}
 
 var width = window.innerWidth,
     height = window.innerHeight,
@@ -43,7 +42,7 @@ var tile = d3.geo.tile()
 
 var zoom = d3.behavior.zoom()
     .scale(2 << 11)
-    .scaleExtent([2 << 8, 2 << 24])
+    //.scaleExtent([2 << 8, Math.pow(2,32)])
     .translate([width / 2, height / 2])
     .on("zoom", zoomed);
 
@@ -68,11 +67,10 @@ function load(tile, canvas) {
     if (buf.readyState === 4) {
       if (buf.status === 200) {
         if (buf.response === null) {
-          delete sq[tile]
           return;
         } else {
           uncollect(buf.response, canvas);
-          delete sq[tile]
+          //console.log(buf.response.byteLength);
           //d3.select(canvas).attr("class", "tile")
         }
       }
@@ -106,18 +104,20 @@ function zoomed() {
 
   image.enter().append("canvas")
       .attr("class", "tile")
-      .attr("height", "255px")
-      .attr("width", "255px")
-      .attr("id", function(d) { 
-          if (!sq[d]) sq[d] = load(d, this); 
-          return d
+      .attr("height", "256px")
+      .attr("width", "256px")
+      .attr("id", function(d) {
+          load(d, this);
+          return d;
       })
-      .style("left", function(d) { return (d[0] << 8) + "px"; })
-      .style("top", function(d) { return (d[1] << 8) + "px"; });
+      .style("left", function(d) { return (d[0] * 256) + "px"; })
+      .style("top", function(d) { return (d[1] * 256) + "px"; });
+      //.style("left", function(d) { return (d[0] << 8) + "px"; })
+      //.style("top", function(d) { return (d[1] << 8) + "px"; });
 }
 
 function matrix3d(scale, translate) {
-  var k = scale / 255, r = scale % 1 ? Number : Math.round;
+  var k = scale / 256, r = scale % 1 ? Number : Math.round;
   return "matrix3d(" + [k, 0, 0, 0, 0, k, 0, 0, 0, 0, k, 0, r(translate[0] * scale), r(translate[1] * scale), 0, 1 ] + ")";
 }
 
