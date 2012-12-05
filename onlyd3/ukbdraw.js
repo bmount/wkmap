@@ -1,9 +1,12 @@
+var viewDv;
+
 function uncollect (buf, canvas) {
   var fullLength = buf.byteLength,
       drawn = 0,
       ctx = canvas.getContext('2d'),
-      ukbtype, nsubgeoms, view, forematter, x, y, px, py,
+      ukbtype, nsubgeoms, view, x, y, px, py,
     dv = new DataView ( buf, 0, fullLength );
+    viewDv = new DataView ( buf, 0, fullLength );
   while (drawn < fullLength) {
       ukbtype = dv.getUint32(drawn, true);
       nsubgeoms = dv.getUint32(drawn + 4, true);
@@ -29,29 +32,28 @@ function uncollect (buf, canvas) {
 function polygon (dv, idx, ctx) {
   var drawn = 0,
       idx = idx,
-      npts = dv.getUint32(idx, true),
+      npts = dv.getUint32(idx, true)
       osmstyle = dv.getUint32(idx + 4, true);
   idx += 8;
   if (npts === 0) {
     return idx;
   }
-  ctx.moveTo(dv.getUint8(idx, true), 255 - dv.getUint8( idx + 1, true));
+  ctx.moveTo(dv.getInt16(idx, true)/100, 256 - dv.getInt16( idx + 2, true)/100);
   ctx.beginPath();
-  var x0 = dv.getUint8(idx, true),
-      y0 = 255 - dv.getUint8(idx + 1, true);
-  idx += 2;
+  idx += 4;
   if (npts === 2) {
-    ctx.lineTo(dv.getUint8(idx, true), 255 - dv.getUint8( idx + 1, true));
+    ctx.lineTo(dv.getInt16(idx, true)/100, 256 - dv.getInt16( idx + 2, true)/100);
     ctx.closePath()
     ctx.stroke()
-    return idx + 2;
+    return idx + 4;
   }
-  for (var i = 2; i < 2*(npts - 1); i += 2) {
-    ctx.lineTo(dv.getUint8(idx + i, true), 255 - dv.getUint8( idx + i + 1, true));
+  for (var i = 4; i < 4*(npts-1); i += 4) {
+    ctx.lineTo(dv.getInt16(idx + i, true)/100, 256 - dv.getInt16( idx + i + 2, true)/100);
   }
   ctx.stroke();
+  ctx.closePath()
   ctx.fill()
-  return idx + 2*(npts - 1);
+  return idx + 4*(npts - 1);
 }
 
 function line (dv, idx, ctx) {
@@ -62,19 +64,19 @@ function line (dv, idx, ctx) {
   streetrender(osmstyle, ctx);
   idx += 8;
   ctx.beginPath();
-  ctx.moveTo(dv.getUint8(idx, true), 255 - dv.getUint8( idx + 1, true));
-  idx += 2;
+  ctx.moveTo(dv.getInt16(idx, true)/100, 256 - dv.getInt16( idx + 2, true)/100);
+  idx += 4;
   if (npts === 2) {
-    ctx.lineTo(dv.getUint8(idx, true), 255 - dv.getUint8( idx + 1, true));
+    ctx.lineTo(dv.getInt16(idx, true)/100, 256 - dv.getInt16( idx + 2, true)/100);
     ctx.closePath()
     ctx.stroke()
-    return idx + 2;
+    return idx + 4;
   }
-  for (var i = 2; i < 2*(npts - 1); i += 2) {
-    ctx.lineTo(dv.getUint8(idx + i, true), 255 - dv.getUint8( idx + i + 1, true));
+  for (var i = 4; i < 4*(npts-1); i += 4) {
+    ctx.lineTo(dv.getInt16(idx + i, true)/100, 256 - dv.getInt16( idx + i + 2, true)/100);
   }
   //ctx.closePath();
   ctx.stroke();
-  return idx + 2*(npts - 1);
+  return idx + 4*(npts - 1);
 }
 

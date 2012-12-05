@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 
 <meta charset="utf-8">
+
+<head>
+
 <style>
 
 body {
@@ -23,7 +26,6 @@ body {
 }
 
 </style>
-<body>
 <script src="d3.v3.min.js"></script>
 <script src="tile.js"></script>
 <!--
@@ -32,10 +34,20 @@ body {
 -->
 <script src="osmstyle.js"></script>
 <script src="ukbdraw.js"></script>
+</head>
+<body>
 <script>
 
 var TMS_URL = '/_canvasback/tms'
 
+var home = [-122.3959350585, 37.7935076241]
+//var home = [-122.410312, 37.761012]
+//var TILE_URL = "http://tile.stamen.com/toner-labels/"
+var TILE_URL = "http://tile.stamen.com/toner/"
+
+var proj = d3.geo.mercator()
+    .center(home)
+    .scale(Math.pow(2,24));
 
 var width = window.innerWidth,
     height = window.innerHeight,
@@ -45,9 +57,9 @@ var tile = d3.geo.tile()
     .size([width, height]);
 
 var zoom = d3.behavior.zoom()
-    .scale(2 << 11)
+    .scale(proj.scale())
     //.scaleExtent([2 << 8, Math.pow(2,32)])
-    .translate([width / 2, height / 2])
+    .translate(proj([0,0]))
     .on("zoom", zoomed);
 
 var map = d3.select("body").append("div")
