@@ -1,4 +1,3 @@
-var viewDv;
 
 function uncollect (buf, canvas) {
   var fullLength = buf.byteLength,
@@ -6,11 +5,10 @@ function uncollect (buf, canvas) {
       ctx = canvas.getContext('2d'),
       ukbtype, nsubgeoms, view, x, y, px, py,
     dv = new DataView ( buf, 0, fullLength );
-    viewDv = new DataView ( buf, 0, fullLength );
   while (drawn < fullLength) {
       ukbtype = dv.getUint32(drawn, true);
-      nsubgeoms = dv.getUint32(drawn + 4, true);
     if (ukbtype === 2) {
+      nsubgeoms = dv.getUint32(drawn + 4, true);
       if (nsubgeoms > 0) {
         drawn = line( dv, (drawn+4), ctx );
       } else {
@@ -18,10 +16,13 @@ function uncollect (buf, canvas) {
       }
     }
     else if (ukbtype === 3) {
-      //drawn = line ( dv, drawn+4, ctx );
       drawn = polygon ( dv, drawn+4, ctx );
     }
+    else if (ukbtype === 1) {
+      drawn = point ( dv, drawn+4, ctx );
+    }
     else {
+      console.log('hitcase');
       ukbtype = 0;
       drawn += 12;
     }
@@ -80,3 +81,16 @@ function line (dv, idx, ctx) {
   return idx + 4*(npts - 1);
 }
 
+function point (dv, idx, ctx) {
+  var idx = idx,
+    osmstyle = dv.getUint32(idx + 4, true);
+  idx += 8;
+  ctx.beginPath();
+  ctx.arc(dv.getInt16(idx, true)/100,
+          256 - dv.getInt16( idx + 2, true)/100,
+          1, 0, Math.PI*2);
+  ctx.fill();
+  ctx.stroke();
+  ctx.closePath();
+  return idx+4;
+}
