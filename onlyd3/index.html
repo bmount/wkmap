@@ -110,13 +110,6 @@ function zoomed() {
 
   image.exit()
     .remove()
-  /*.filter(function (rmed) {
-        if (rmed) {
-          var idarr = rmed.toString()
-            if (sq[idarr]) sq[idarr].abort()
-        }
-      })
-  */
 
   image.enter().append("canvas")
       .attr("class", "tile")
